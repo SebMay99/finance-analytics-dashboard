@@ -46,12 +46,14 @@ if uploaded_file:
         # Cell Mapping for Day 1 financial information
         costs = df.iloc[44, 1:18].tolist()
         revenues = df.iloc[42, 1:18].tolist()
-        margins = df.iloc[46, 1:18].tolist()
+        margins = df.iloc[45, 1:18].tolist()
+        percentages = df.iloc[46, 1:18].tolist()
 
         # Data Transformation
         processed_costs = [cost * 1000 for cost in costs]
         processed_revenue = [revenue * 1000 for revenue in revenues]
         processed_margin = [margin * 100 for margin in margins]
+        processed_margin_percentage = [percentage * 100 for percentage in percentages]
 
         data = {
             "Category": ["HPC-AI","Compute","Storage","Software","3P/OEM","Total Product","Installation","Support",
@@ -59,7 +61,8 @@ if uploaded_file:
                          "Ezmeral","Total Services"],
             "Cost": processed_costs,
             "Revenue": processed_revenue,
-            "Margin": processed_margin
+            "Margin": processed_margin,
+            "Percentage": processed_margin_percentage
         }
 
         results_df = pd.DataFrame(data)
@@ -89,64 +92,90 @@ if uploaded_file:
         filtered_table_df = table_df[(table_df['Cost'] > 0) | (table_df['Margin'] != 0)]
 
         #Graphs
-        col1, col2, col3 = st.columns(3)
+        # Grid Layout 2x2
+        if not filtered_table_df.empty:
+            # Row 1
+            row1_col1, row1_col2 = st.columns(2)
 
-        with col1:
-            fig_cost = px.bar(filtered_plot_df, x='Category', y='Cost', title="Total Cost by Segment", text_auto='.3s',
-                              color_discrete_sequence=['#01a982'])
-            fig_cost.update_traces(
-                texttemplate='$%{y:,.2s}',
-                textposition='outside',
-                cliponaxis = False
-            )
-            fig_cost.update_layout(title={
-                'y': 0.9,
-                'x': 0.5,
-                'xanchor': 'center',
-                'yanchor': 'top',
-                }, 
-                margin=dict(l=60, r=20, t=80, b=40),
-                title_font=dict(size=20))
-            fig_cost.update_yaxes(tickprefix="$", title_text="Cost (USD)")
-            st.plotly_chart(fig_cost,width='stretch')
-        
-        with col2:
-            fig_cost = px.bar(filtered_plot_df, x='Category', y='Revenue', title="Total Revenue by Segment", text_auto='.3s',
-                              color_discrete_sequence=['#01a982'])
-            fig_cost.update_traces(
-                texttemplate='$%{y:,.2s}',
-                textposition='outside',
-                cliponaxis = False
-            )
-            fig_cost.update_layout(title={
-                'y': 0.9,
-                'x': 0.5,
-                'xanchor': 'center',
-                'yanchor': 'top'
-                }, 
-                margin=dict(l=60, r=20, t=80, b=40),
-                title_font=dict(size=20))
-            fig_cost.update_yaxes(tickprefix="$", title_text="Revenue (USD)")
-            st.plotly_chart(fig_cost,width='stretch')
+            with row1_col1:
+                fig_cost = px.bar(filtered_plot_df, x='Category', y='Cost', title="Cost by Segment", text_auto='.3s',
+                                color_discrete_sequence=['#01a982'])
+                fig_cost.update_traces(
+                    texttemplate='$%{y:,.2s}',
+                    textposition='outside',
+                    cliponaxis = False
+                )
+                fig_cost.update_layout(title={
+                    'y': 0.9,
+                    'x': 0.5,
+                    'xanchor': 'center',
+                    'yanchor': 'top',
+                    }, 
+                    margin=dict(l=60, r=20, t=80, b=40),
+                    title_font=dict(size=20))
+                fig_cost.update_yaxes(tickprefix="$", title_text="Cost (USD)")
+                st.plotly_chart(fig_cost,width='stretch')
+            
+            with row1_col2:
+                fig_cost = px.bar(filtered_plot_df, x='Category', y='Revenue', title="Revenue by Segment", text_auto='.3s',
+                                color_discrete_sequence=['#01a982'])
+                fig_cost.update_traces(
+                    texttemplate='$%{y:,.2s}',
+                    textposition='outside',
+                    cliponaxis = False
+                )
+                fig_cost.update_layout(title={
+                    'y': 0.9,
+                    'x': 0.5,
+                    'xanchor': 'center',
+                    'yanchor': 'top'
+                    }, 
+                    margin=dict(l=60, r=20, t=80, b=40),
+                    title_font=dict(size=20))
+                fig_cost.update_yaxes(tickprefix="$", title_text="Revenue (USD)")
+                st.plotly_chart(fig_cost,width='stretch')
 
-        with col3:
-            fig_cost = px.bar(filtered_plot_df, x='Category', y='Margin', title="Total Margin by Segment", text_auto= '.2f',
-                              color_discrete_sequence=['#004777'])
-            fig_cost.update_traces(
-                texttemplate='%{y:,.2s}%',
-                textposition='outside',
-                cliponaxis = False
-            )
-            fig_cost.update_layout(title={
-                'y': 0.9,
-                'x': 0.5,
-                'xanchor': 'center',
-                'yanchor': 'top'
-                }, 
-                margin=dict(l=60, r=20, t=80, b=40),
-                title_font=dict(size=20))
-            fig_cost.update_yaxes(ticksuffix="%", title_text="Margin (%)")
-            st.plotly_chart(fig_cost,width='stretch')
+            # Row 2
+            row2_col1, row2_col2 = st.columns(2)
+
+            with row2_col1:
+                fig_cost = px.bar(filtered_plot_df, x='Category', y='Margin', title="FLGM Pre-rebate by Segment", text_auto='.3s',
+                                color_discrete_sequence=['#01a982'])
+                fig_cost.update_traces(
+                    texttemplate='$%{y:,.2s}',
+                    textposition='outside',
+                    cliponaxis = False
+                )
+                fig_cost.update_layout(title={
+                    'y': 0.9,
+                    'x': 0.5,
+                    'xanchor': 'center',
+                    'yanchor': 'top'
+                    }, 
+                    margin=dict(l=60, r=20, t=80, b=40),
+                    title_font=dict(size=20))
+                fig_cost.update_yaxes(tickprefix="$", title_text="Margin(USD)")
+                st.plotly_chart(fig_cost,width='stretch')
+            
+            with row2_col2:
+                fig_cost = px.bar(filtered_plot_df, x='Category', y='Percentage', title="FLGM% Pre-rebate by Segment", text_auto= '.2f',
+                                color_discrete_sequence=['#004777'])
+                fig_cost.update_traces(
+                    texttemplate='%{y:,.2s}%',
+                    textposition='outside',
+                    cliponaxis = False
+                )
+                fig_cost.update_layout(title={
+                    'y': 0.9,
+                    'x': 0.5,
+                    'xanchor': 'center',
+                    'yanchor': 'top'
+                    }, 
+                    margin=dict(l=60, r=20, t=80, b=40),
+                    title_font=dict(size=20))
+                fig_cost.update_yaxes(ticksuffix="%", title_text="Margin (%)")
+                st.plotly_chart(fig_cost,width='stretch')
+
 
         # Summary Table
         st.write("### Data Summary")
@@ -158,11 +187,19 @@ if uploaded_file:
                 .format({
                     "Cost": "${:,.2f}",
                     "Revenue": "${:,.2f}",
-                    "Margin": "{:,.2f}%"
+                    "Margin": "${:,.2f}",
+                    "Percentage": "{:,.2f}%"
                 })
                 .hide(axis='index')
                 .to_html()
             )
+
+            # Reemplazar los encabezados en el HTML
+            html_table = html_table.replace(">Cost<", ">Costs<") \
+                                .replace(">Revenue<", ">Revenue<") \
+                                .replace(">Margin<", ">FLGM Pre-rebate<")\
+                                .replace(">Percentage<", ">FLGM% Pre-rebate<")\
+
 
         st.markdown(html_table, unsafe_allow_html=True)
 

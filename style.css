@@ -53,13 +53,6 @@
     color: #004777;
     padding: 10px;
 
-/*Total Rows*/
-.total-row{
-    background-color: #01a982;
-    color: white !important;
-    font-weight: bold !important;
-}
-
 .thead-hide, .row_heading {
     display: none !important;
 }
