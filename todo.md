@@ -6,6 +6,6 @@ TODO
 5. ~~Graphs and tables should ignore categories with $0 (could drop from the DF)~~
 6. Don't show the ID in the table
 7. ~~Y-axis should show $ and % respectively~~ 
-8. Graph title should be centered
+8. ~~Graph title should be centered~~
 9. ~~Hide the Navbar (for now)~~
 10. Compile into .exe

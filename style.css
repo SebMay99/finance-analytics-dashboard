@@ -37,3 +37,34 @@
     color: #1e1e1e !important
 }
 
+/*Style Table*/
+.sthMarkdown table {
+    width: 100%;
+    background-color: #ffffff;
+    color: #31333F;
+    border-radius: 10px;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+/*Table Header*/
+.stMarkdown table th {
+    background-color: #f0f2f6;
+    color: #004777;
+    padding: 10px;
+
+/*Total Rows*/
+.total-row{
+    background-color: #01a982;
+    color: white !important;
+    font-weight: bold !important;
+}
+
+.thead-hide, .row_heading {
+    display: none !important;
+}
+
+.blank {
+    display: none !important;
+}
+}
