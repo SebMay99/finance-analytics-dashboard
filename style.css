@@ -1,0 +1,39 @@
+/* Main background */
+.stApp{
+    background-color: #1d1f27;
+}
+
+/*Titles on blue background*/
+.main h1, .main h2, .main h3, .stMarkdown p{
+    color: #ffffff !important
+}
+
+/*File uploader upload area*/
+[data-testid="stFileUploader"]{
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 15px;
+}
+
+[data-testid="stFileUploaderFileName"],
+[data-testid="stFileUploader"] label{
+    color: #31333F !important;
+    font:bold
+}
+
+/*Drag and drop text*/
+[data-test="stFileUploader"] section {
+    color: #333333 !important
+}
+
+/*File upload instructions*/
+[data-test="stFileUploader"] label p{
+    color: #ffffff !important;
+    font-weight: bold;
+}
+
+/*Warning alerts*/
+[data-testid="stNotification"] p{
+    color: #1e1e1e !important
+}
+
