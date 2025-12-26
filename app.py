@@ -6,7 +6,7 @@ from processing import local_css, set_row_style
 
 # Page configuration 
 st.set_page_config(
-    page_title="HPE GreenLake Model Analyzer",
+    page_title="HPE GreenLake Finance Analytics",
     page_icon = Image.open("assets/HPE_icon.png"),
     layout="wide"
 )
@@ -23,8 +23,7 @@ local_css("style.css")
 
     
 # Main interface
-st.title("Financial Model Analytics")
-st.write("Professional Automation Tool for Solution Architects")
+st.title("HPE GreenLake Finance Analytics")
 
 # File upload section
 st.markdown("### 1.Data Ingestion")
@@ -44,10 +43,10 @@ if uploaded_file:
             st.success("File Loaded")
 
         # Cell Mapping for Day 1 financial information
-        costs = df.iloc[44, 1:18].tolist()
-        revenues = df.iloc[42, 1:18].tolist()
-        margins = df.iloc[45, 1:18].tolist()
-        percentages = df.iloc[46, 1:18].tolist()
+        costs = df.iloc[44, 1:24].tolist()
+        revenues = df.iloc[42, 1:24].tolist()
+        margins = df.iloc[45, 1:24].tolist()
+        percentages = df.iloc[46, 1:24].tolist()
 
         # Data Transformation
         processed_costs = [cost * 1000 for cost in costs]
@@ -58,7 +57,7 @@ if uploaded_file:
         data = {
             "Category": ["HPC-AI","Compute","Storage","Software","3P/OEM","Total Product","Installation","Support",
                          "Complete Care","Managed Services","Colo","3PP Product","3PP Support","SaaS","SW Services",
-                         "Ezmeral","Total Services"],
+                         "Ezmeral","Total Services","Total Products+Services","A&PS","A&PS 3PP","A&PS Colo","Total A&PS","Pan HPE"],
             "Cost": processed_costs,
             "Revenue": processed_revenue,
             "Margin": processed_margin,
@@ -69,12 +68,13 @@ if uploaded_file:
     
         # Visualization
         st.write("### 2.Financial Analysis Breakdown")
-        view_option = st.selectbox("Select View", ["All","Products Only","Services Only"])
+        view_option = st.selectbox("Select View", ["All","Products Only","Services Only","A&PS Only"])
 
         product_cats = ["HPC-AI","Compute","Storage","Software","3P/OEM"]
         service_cats = ["Installation","Support", "Complete Care","Managed Services",
                         "Colo","3PP Product","3PP Support","SaaS","SW Services",
                         "Ezmeral"]
+        aps_cats = ["A&PS","A&PS 3PP","A&PS Colo"]
 
         # Filter logic for the graphs
         if view_option == "Products Only":
@@ -83,8 +83,16 @@ if uploaded_file:
         elif view_option == "Services Only":
             plot_df = results_df[results_df['Category'].isin(service_cats)]
             table_df = results_df[results_df['Category'].isin(service_cats + ["Total Services"])]
+        elif view_option == "A&PS Only":
+            plot_df = results_df[results_df['Category'].isin(aps_cats)]
+            table_df = results_df[results_df['Category'].isin(aps_cats + ["Total A&PS"])]
         else:
-            plot_df = results_df[(results_df['Category'] != "Total Product") & (results_df['Category'] != "Total Services")]
+            plot_df = results_df[(results_df['Category'] != "Total Product") & 
+                                 (results_df['Category'] != "Total Services") & 
+                                 (results_df['Category'] != "Total A&PS") & 
+                                 (results_df['Category'] != "Pan HPE") &
+                                 (results_df['Category'] != "Products+Services")]
+            
             table_df = results_df
 
         # Remove $0 and 0%     
@@ -159,7 +167,7 @@ if uploaded_file:
             
             with row2_col2:
                 fig_cost = px.bar(filtered_plot_df, x='Category', y='Percentage', title="FLGM% Pre-rebate by Segment", text_auto= '.2f',
-                                color_discrete_sequence=['#004777'])
+                                color_discrete_sequence=['#01a982'])
                 fig_cost.update_traces(
                     texttemplate='%{y:,.2s}%',
                     textposition='outside',
