@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from PIL import Image
 import plotly.express as px
-from processing import local_css, set_row_style
+from processing import local_css, set_row_style, get_color_map
 
 # Page configuration 
 st.set_page_config(
@@ -68,7 +68,14 @@ if uploaded_file:
     
         # Visualization
         st.write("### 2.Financial Analysis Breakdown")
-        view_option = st.selectbox("Select View", ["All","Products Only","Services Only","A&PS Only"])
+
+        col_filter1, col_filter2 = st.columns(2)
+
+        with col_filter1:
+            view_option = st.selectbox("Select View", ["All","Products Only","Services Only","A&PS Only"])
+
+        with col_filter2:
+            chart_type = st.selectbox("Chart Style",["Bar Charts","Donut Charts"])
 
         product_cats = ["HPC-AI","Compute","Storage","Software","3P/OEM"]
         service_cats = ["Installation","Support", "Complete Care","Managed Services",
@@ -91,7 +98,7 @@ if uploaded_file:
                                  (results_df['Category'] != "Total Services") & 
                                  (results_df['Category'] != "Total A&PS") & 
                                  (results_df['Category'] != "Pan HPE") &
-                                 (results_df['Category'] != "Products+Services")]
+                                 (results_df['Category'] != "Total Products+Services")]
             
             table_df = results_df
 
@@ -102,43 +109,75 @@ if uploaded_file:
         #Graphs
         # Grid Layout 2x2
         if not filtered_table_df.empty:
+
+            # Graph colors
+            colors = get_color_map(filtered_plot_df,product_cats,service_cats,aps_cats)
+
+            # Graph margins
+            margins = dict(l=40, r=0, t=80, b=80)
+
             # Row 1
             row1_col1, row1_col2 = st.columns(2)
 
             with row1_col1:
-                fig_cost = px.bar(filtered_plot_df, x='Category', y='Cost', title="Cost by Segment", text_auto='.3s',
-                                color_discrete_sequence=['#01a982'])
-                fig_cost.update_traces(
-                    texttemplate='$%{y:,.2s}',
-                    textposition='outside',
-                    cliponaxis = False
-                )
+                # Bar Chart:
+                if chart_type == "Bar Charts":
+                    fig_cost = px.bar(filtered_plot_df, x='Category', y='Cost', title="Cost by Segment", text_auto='.3s',
+                                    color="Category",color_discrete_map=colors)
+                    fig_cost.update_traces(
+                        texttemplate='$%{y:,.2s}',
+                        textposition='outside',
+                        cliponaxis = False
+                    )
+                # Pie Chart
+                else: 
+                    fig_cost = px.pie(filtered_plot_df, values='Cost', names='Category', hole=0.5,title="Cost Distribution",
+                                      color='Category', color_discrete_map=colors)
+                    fig_cost.update_traces(textinfo='percent+label',
+                                           textposition='inside',
+                                           insidetextorientation='horizontal',
+                                           textfont=dict(
+                                               weight="bold"
+                                           )
+                                           )
                 fig_cost.update_layout(title={
-                    'y': 0.9,
-                    'x': 0.5,
-                    'xanchor': 'center',
-                    'yanchor': 'top',
-                    }, 
-                    margin=dict(l=60, r=20, t=80, b=40),
-                    title_font=dict(size=20))
+                        'y': 0.95,
+                        'x': 0.5,
+                        'xanchor': 'center',
+                        'yanchor': 'top',
+                        }, 
+                        margin=margins,
+                        title_font=dict(size=20))
                 fig_cost.update_yaxes(tickprefix="$", title_text="Cost (USD)")
                 st.plotly_chart(fig_cost,width='stretch')
             
             with row1_col2:
-                fig_cost = px.bar(filtered_plot_df, x='Category', y='Revenue', title="Revenue by Segment", text_auto='.3s',
-                                color_discrete_sequence=['#01a982'])
-                fig_cost.update_traces(
-                    texttemplate='$%{y:,.2s}',
-                    textposition='outside',
-                    cliponaxis = False
-                )
+                # Bar Chart
+                if chart_type == "Bar Charts":
+                    fig_cost = px.bar(filtered_plot_df, x='Category', y='Revenue', title="Revenue by Segment", text_auto='.3s',
+                                    color="Category",color_discrete_map=colors)
+                    fig_cost.update_traces(
+                        texttemplate='$%{y:,.2s}',
+                        textposition='outside',
+                        cliponaxis = False
+                    )
+                else: 
+                    fig_cost = px.pie(filtered_plot_df, values='Revenue', names='Category', hole=0.5,title="Revenue Distribution",
+                                      color='Category', color_discrete_map=colors)
+                    fig_cost.update_traces(textinfo='percent+label',
+                                           textposition='inside',
+                                           insidetextorientation='horizontal',
+                                           textfont=dict(
+                                               weight="bold"
+                                           )
+                                           )
                 fig_cost.update_layout(title={
-                    'y': 0.9,
+                    'y': 0.95,
                     'x': 0.5,
                     'xanchor': 'center',
                     'yanchor': 'top'
                     }, 
-                    margin=dict(l=60, r=20, t=80, b=40),
+                    margin=margins,
                     title_font=dict(size=20))
                 fig_cost.update_yaxes(tickprefix="$", title_text="Revenue (USD)")
                 st.plotly_chart(fig_cost,width='stretch')
@@ -147,42 +186,56 @@ if uploaded_file:
             row2_col1, row2_col2 = st.columns(2)
 
             with row2_col1:
-                fig_cost = px.bar(filtered_plot_df, x='Category', y='Margin', title="FLGM Pre-rebate by Segment", text_auto='.3s',
-                                color_discrete_sequence=['#01a982'])
-                fig_cost.update_traces(
-                    texttemplate='$%{y:,.2s}',
-                    textposition='outside',
-                    cliponaxis = False
-                )
+                # Bar Chart:
+                if chart_type == "Bar Charts":
+                    fig_cost = px.bar(filtered_plot_df, x='Category', y='Margin', title="FLGM Pre-rebate by Segment", text_auto='.3s',
+                                    color="Category",color_discrete_map=colors)
+                    fig_cost.update_traces(
+                        texttemplate='$%{y:,.2s}',
+                        textposition='outside',
+                        cliponaxis = False
+                    )
+                else: 
+                    fig_cost = px.pie(filtered_plot_df, values='Margin', names='Category', hole=0.5,title="Margin Distribution",
+                                      color='Category', color_discrete_map=colors)
+                    fig_cost.update_traces(textinfo='percent+label',
+                                           textposition='inside',
+                                           insidetextorientation='horizontal',
+                                           textfont=dict(
+                                               weight="bold"
+                                           )
+                                           )
                 fig_cost.update_layout(title={
-                    'y': 0.9,
+                    'y': 0.95,
                     'x': 0.5,
                     'xanchor': 'center',
                     'yanchor': 'top'
                     }, 
-                    margin=dict(l=60, r=20, t=80, b=40),
+                    margin=margins,
                     title_font=dict(size=20))
                 fig_cost.update_yaxes(tickprefix="$", title_text="Margin(USD)")
                 st.plotly_chart(fig_cost,width='stretch')
             
             with row2_col2:
-                fig_cost = px.bar(filtered_plot_df, x='Category', y='Percentage', title="FLGM% Pre-rebate by Segment", text_auto= '.2f',
-                                color_discrete_sequence=['#01a982'])
-                fig_cost.update_traces(
-                    texttemplate='%{y:,.2s}%',
-                    textposition='outside',
-                    cliponaxis = False
-                )
-                fig_cost.update_layout(title={
-                    'y': 0.9,
-                    'x': 0.5,
-                    'xanchor': 'center',
-                    'yanchor': 'top'
-                    }, 
-                    margin=dict(l=60, r=20, t=80, b=40),
-                    title_font=dict(size=20))
-                fig_cost.update_yaxes(ticksuffix="%", title_text="Margin (%)")
-                st.plotly_chart(fig_cost,width='stretch')
+                # Bar Chart only
+                if chart_type == "Bar Charts":
+                    fig_cost = px.bar(filtered_plot_df, x='Category', y='Percentage', title="FLGM% Pre-rebate by Segment", text_auto= '.2f',
+                                    color="Category",color_discrete_map=colors)
+                    fig_cost.update_traces(
+                        texttemplate='%{y:,.2s}%',
+                        textposition='outside',
+                        cliponaxis = False
+                    )
+                    fig_cost.update_layout(title={
+                        'y': 0.9,
+                        'x': 0.5,
+                        'xanchor': 'center',
+                        'yanchor': 'top'
+                        }, 
+                        margin=margins,
+                        title_font=dict(size=20))
+                    fig_cost.update_yaxes(ticksuffix="%", title_text="Margin (%)")
+                    st.plotly_chart(fig_cost,width='stretch')
 
 
         # Summary Table
