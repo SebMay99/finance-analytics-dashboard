@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from PIL import Image
 import plotly.express as px
-from processing import local_css, set_row_style, get_color_map
+from processing import local_css, set_row_style, get_color_map, dynamic_options_selector, load_data
 
 # Page configuration 
 st.set_page_config(
@@ -31,48 +31,16 @@ uploaded_file = st.file_uploader("Upload your All Reports Excel file", type=["xl
 
 if uploaded_file:
     try:
-        # Load the All Reports as a DF and Check if it's a custom file
-        try:
-            sheet_name = "PL_MGMT Edit"
-            df = pd.read_excel(uploaded_file,sheet_name=sheet_name, engine='openpyxl')
-            st.success("Custom File Loaded")
-        
-        except:
-            sheet_name = "PL_MGMT"
-            df = pd.read_excel(uploaded_file,sheet_name=sheet_name, engine='openpyxl')
-            st.success("File Loaded")
+        results_df = load_data(uploaded_file)
+        available_options = dynamic_options_selector(results_df)
 
-        # Cell Mapping for Day 1 financial information
-        costs = df.iloc[44, 1:24].tolist()
-        revenues = df.iloc[42, 1:24].tolist()
-        margins = df.iloc[45, 1:24].tolist()
-        percentages = df.iloc[46, 1:24].tolist()
-
-        # Data Transformation
-        processed_costs = [cost * 1000 for cost in costs]
-        processed_revenue = [revenue * 1000 for revenue in revenues]
-        processed_margin = [margin * 100 for margin in margins]
-        processed_margin_percentage = [percentage * 100 for percentage in percentages]
-
-        data = {
-            "Category": ["HPC-AI","Compute","Storage","Software","3P/OEM","Total Product","Installation","Support",
-                         "Complete Care","Managed Services","Colo","3PP Product","3PP Support","SaaS","SW Services",
-                         "Ezmeral","Total Services","Total Products+Services","A&PS","A&PS 3PP","A&PS Colo","Total A&PS","Pan HPE"],
-            "Cost": processed_costs,
-            "Revenue": processed_revenue,
-            "Margin": processed_margin,
-            "Percentage": processed_margin_percentage
-        }
-
-        results_df = pd.DataFrame(data)
-    
         # Visualization
         st.write("### 2.Financial Analysis Breakdown")
 
         col_filter1, col_filter2 = st.columns(2)
 
         with col_filter1:
-            view_option = st.selectbox("Select View", ["All","Products Only","Services Only","A&PS Only"])
+            view_option = st.selectbox("Select View", available_options)
 
         with col_filter2:
             chart_type = st.selectbox("Chart Style",["Bar Charts","Donut Charts"])
@@ -127,7 +95,8 @@ if uploaded_file:
                     fig_cost.update_traces(
                         texttemplate='$%{y:,.2s}',
                         textposition='outside',
-                        cliponaxis = False
+                        cliponaxis = False,
+                        hovertemplate="<b>%{label}</b><br>Cost: $%{value:,.2f}<extra></extra>"
                     )
                 # Pie Chart
                 else: 
@@ -138,6 +107,12 @@ if uploaded_file:
                                            insidetextorientation='horizontal',
                                            textfont=dict(
                                                weight="bold"
+                                           ),
+                                           hovertemplate="<b>%{label}</b><br>Cost: $%{value:,.2f}<extra></extra>"
+                                           )
+                    fig_cost.update_layout(   uniformtext=dict(
+                                               minsize=8,
+                                               mode='hide'
                                            )
                                            )
                 fig_cost.update_layout(title={
@@ -159,7 +134,8 @@ if uploaded_file:
                     fig_cost.update_traces(
                         texttemplate='$%{y:,.2s}',
                         textposition='outside',
-                        cliponaxis = False
+                        cliponaxis = False,
+                        hovertemplate="<b>%{label}</b><br>Revenue: $%{value:,.2f}<extra></extra>"
                     )
                 else: 
                     fig_cost = px.pie(filtered_plot_df, values='Revenue', names='Category', hole=0.5,title="Revenue Distribution",
@@ -169,6 +145,12 @@ if uploaded_file:
                                            insidetextorientation='horizontal',
                                            textfont=dict(
                                                weight="bold"
+                                           ),
+                                           hovertemplate="<b>%{label}</b><br>Revenue: $%{value:,.2f}<extra></extra>"
+                                           )
+                    fig_cost.update_layout(   uniformtext=dict(
+                                               minsize=8,
+                                               mode='hide'
                                            )
                                            )
                 fig_cost.update_layout(title={
@@ -193,7 +175,8 @@ if uploaded_file:
                     fig_cost.update_traces(
                         texttemplate='$%{y:,.2s}',
                         textposition='outside',
-                        cliponaxis = False
+                        cliponaxis = False,
+                        hovertemplate="<b>%{label}</b><br>Margin: $%{value:,.2f}<extra></extra>"
                     )
                 else: 
                     fig_cost = px.pie(filtered_plot_df, values='Margin', names='Category', hole=0.5,title="Margin Distribution",
@@ -203,6 +186,12 @@ if uploaded_file:
                                            insidetextorientation='horizontal',
                                            textfont=dict(
                                                weight="bold"
+                                           ),
+                                           hovertemplate="<b>%{label}</b><br>Margin: $%{value:,.2f}<extra></extra>"
+                                           )
+                    fig_cost.update_layout(   uniformtext=dict(
+                                               minsize=8,
+                                               mode='hide'
                                            )
                                            )
                 fig_cost.update_layout(title={
@@ -224,7 +213,8 @@ if uploaded_file:
                     fig_cost.update_traces(
                         texttemplate='%{y:,.2s}%',
                         textposition='outside',
-                        cliponaxis = False
+                        cliponaxis = False,
+                        hovertemplate="<b>%{label}</b><br>FLGM%: %{value:,.2f}%<extra></extra>"
                     )
                     fig_cost.update_layout(title={
                         'y': 0.9,
