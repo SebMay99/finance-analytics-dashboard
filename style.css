@@ -3,6 +3,20 @@
     background-color: #1d1f27;
 }
 
+
+.stAppHeader{
+    visibility: hidden;
+}
+
+#MainMenu, footer{
+    visibility: hidden;
+}
+
+.block-container{
+    padding-top: 1rem !important;
+    padding-bottom: 0rem !important;
+}
+
 /*Titles on blue background*/
 .main h1, .main h2, .main h3, .stMarkdown p{
     color: #ffffff !important
