@@ -1,9 +1,17 @@
 import streamlit as st 
 import pandas as pd
+import sys
+import os
+
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
+
 
 # Load CSS
 def local_css(file_name):
-    with open(file_name) as f:
+    with open(resource_path(file_name)) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 def set_row_style(row):

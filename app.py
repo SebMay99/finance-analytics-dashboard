@@ -1,13 +1,14 @@
 import streamlit as st 
-import pandas as pd
 from PIL import Image
 import plotly.express as px
-from processing import local_css, set_row_style, get_color_map, dynamic_options_selector, load_data
+from processing import local_css, set_row_style, get_color_map, dynamic_options_selector, load_data, resource_path
+
+icon_path = resource_path("assets/HPE_icon.webp")
 
 # Page configuration 
 st.set_page_config(
     page_title="HPE GreenLake Finance Analytics",
-    page_icon = Image.open("assets/HPE_icon.png"),
+    page_icon = Image.open(icon_path),
     layout="wide"
 )
 
