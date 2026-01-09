@@ -8,7 +8,7 @@ TODO v0.1
 7. ~~Y-axis should show $ and % respectively~~ 
 8. ~~Graph title should be centered~~
 9. ~~Hide the Navbar (for now)~~
-10. Compile into .exe
+10. ~~Compile into .exe~~
 
 TODO v0.2
 1. ~~Fix what if no A&PS/Product/SW?~~
