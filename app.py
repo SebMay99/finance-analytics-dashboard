@@ -56,12 +56,31 @@ if uploaded_file:
         if view_option == "Products Only":
             plot_df = results_df[results_df['Category'].isin(product_cats)]
             table_df = results_df[results_df['Category'].isin(product_cats + ["Total Product"])]
+
+            total_cost = table_df[table_df['Category'] == 'Total Product']['Cost'].values[0]
+            total_revenue = table_df[table_df['Category'] == 'Total Product']['Revenue'].values[0]
+            total_margin = table_df[table_df['Category'] == 'Total Product']['Margin'].values[0]
+            total_percentage = table_df[table_df['Category'] == 'Total Product']['Percentage'].values[0]
+
         elif view_option == "Services Only":
             plot_df = results_df[results_df['Category'].isin(service_cats)]
             table_df = results_df[results_df['Category'].isin(service_cats + ["Total Services"])]
+
+            total_cost = table_df[table_df['Category'] == 'Total Services']['Cost'].values[0]
+            total_revenue = table_df[table_df['Category'] == 'Total Services']['Revenue'].values[0]
+            total_margin = table_df[table_df['Category'] == 'Total Services']['Margin'].values[0]
+            total_percentage = table_df[table_df['Category'] == 'Total Services']['Percentage'].values[0]
+
         elif view_option == "A&PS Only":
             plot_df = results_df[results_df['Category'].isin(aps_cats)]
             table_df = results_df[results_df['Category'].isin(aps_cats + ["Total A&PS"])]
+
+            total_cost = table_df[table_df['Category'] == 'Total A&PS']['Cost'].values[0]
+            total_revenue = table_df[table_df['Category'] == 'Total A&PS']['Revenue'].values[0]
+            total_margin = table_df[table_df['Category'] == 'Total A&PS']['Margin'].values[0]
+            total_percentage = table_df[table_df['Category'] == 'Total A&PS']['Percentage'].values[0]
+            
+
         else:
             plot_df = results_df[(results_df['Category'] != "Total Product") & 
                                  (results_df['Category'] != "Total Services") & 
@@ -70,6 +89,11 @@ if uploaded_file:
                                  (results_df['Category'] != "Total Products+Services")]
             
             table_df = results_df
+
+            total_cost = table_df[table_df['Category'] == 'Pan HPE']['Cost'].values[0]
+            total_revenue = table_df[table_df['Category'] == 'Pan HPE']['Revenue'].values[0]
+            total_margin = table_df[table_df['Category'] == 'Pan HPE']['Margin'].values[0]
+            total_percentage = table_df[table_df['Category'] == 'Pan HPE']['Percentage'].values[0]
 
         # Remove $0 and 0%     
         filtered_plot_df = plot_df[(plot_df['Cost'] > 0) | (plot_df['Margin'] != 0)]
@@ -83,7 +107,7 @@ if uploaded_file:
             colors = get_color_map(filtered_plot_df,product_cats,service_cats,aps_cats)
 
             # Graph margins
-            margins = dict(l=40, r=0, t=80, b=80)
+            margins = dict(l=100, r=30, t=80, b=80)
 
             # Row 1
             row1_col1, row1_col2 = st.columns(2)
@@ -116,6 +140,16 @@ if uploaded_file:
                                                mode='hide'
                                            )
                                            )
+                fig_cost.add_annotation(
+                    text=f'<b>Total Cost</b><br>${total_cost:,.2f}',
+                    font=dict(size=14),
+                    xref="x domain", yref="y domain",
+                    x=1.21, y=1.21,
+                    xanchor = 'right',
+                    yanchor= 'top',
+                    showarrow=False,
+                    align="center"
+                )    
                 fig_cost.update_layout(title={
                         'y': 0.95,
                         'x': 0.5,
@@ -154,6 +188,16 @@ if uploaded_file:
                                                mode='hide'
                                            )
                                            )
+                fig_cost.add_annotation(
+                    text=f'<b>Total Revenue</b><br>${total_revenue:,.2f}',
+                    font=dict(size=13.5),
+                    xref="paper", yref="paper",
+                    x=1.21, y=1.21,
+                    xanchor = 'right',
+                    yanchor= 'top',
+                    showarrow=False,
+                    align="center"
+                )     
                 fig_cost.update_layout(title={
                     'y': 0.95,
                     'x': 0.5,
@@ -195,6 +239,16 @@ if uploaded_file:
                                                mode='hide'
                                            )
                                            )
+                fig_cost.add_annotation(
+                    text=f'<b>Total FLGM</b><br><b>Pre-rebate</b><br>${total_margin:,.2f}',
+                    font=dict(size=13),
+                    xref="paper", yref="paper",
+                    x=1.21, y=1.21,
+                    xanchor = 'right',
+                    yanchor= 'top',
+                    showarrow=False,
+                    align="center"
+                ) 
                 fig_cost.update_layout(title={
                     'y': 0.95,
                     'x': 0.5,
@@ -217,6 +271,16 @@ if uploaded_file:
                         cliponaxis = False,
                         hovertemplate="<b>%{label}</b><br>FLGM%: %{value:,.2f}%<extra></extra>"
                     )
+                    fig_cost.add_annotation(
+                    text=f'<b>Total FLGM%</b><br><b>Pre-rebate</b><br>{total_percentage:,.2f}%',
+                    font=dict(size=13),
+                    xref="paper", yref="paper",
+                    x=1.21, y=1.21,
+                    xanchor = 'right',
+                    yanchor= 'top',
+                    showarrow=False,
+                    align="center"
+                )
                     fig_cost.update_layout(title={
                         'y': 0.9,
                         'x': 0.5,

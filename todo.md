@@ -15,4 +15,10 @@ TODO v0.2
 2. Generate PDF export
 3. Generate Email export
 4. Improve table color by category
+
+TODO v0.3
+1. ~~Force Dark Mode~~
+2. Add After Rebate Info
+3. Add a total to the graphs
+4. Add percentage to the overlay with mouse
  
