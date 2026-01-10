@@ -18,7 +18,9 @@ TODO v0.2
 
 TODO v0.3
 1. ~~Force Dark Mode~~
-2. Add After Rebate Info
-3. Add a total to the graphs
-4. Add percentage to the overlay with mouse
- 
+2. Add After Rebate Info and logic
+3. ~~Add a total to the graphs~~
+4. ~~Add percentage to the overlay with mouse~~
+5. Optimize get_color_map()
+6. Separate graph and table generation functions in their own .py
+7. Don't show Total Products+Services in the table if there's no A&PS (Redudant)

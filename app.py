@@ -1,14 +1,12 @@
 import streamlit as st 
 from PIL import Image
-import plotly.express as px
-import plotly.graph_objects as go
-from processing import local_css, set_row_style, get_color_map, dynamic_options_selector, load_data, resource_path, graph_generation, view_option_select
+from processing import local_css,dynamic_options_selector, load_data, resource_path,view_option_select,graph_type_selector,table_generation
 
 icon_path = resource_path("assets/HPE_icon.webp")
 
 # Page configuration 
 st.set_page_config(
-    page_title="HPE GreenLake Finance Analytics",
+    page_title="HPE GreenLake Finance Analytics v0.3",
     page_icon = Image.open(icon_path),
     layout="wide"
 )
@@ -22,7 +20,6 @@ local_css("style.css")
 #    st.title("Navigation")
 #    st.markdown("---")
 #    st.info("Log in to access advanced features")
-
     
 # Main interface
 st.title("HPE GreenLake Finance Analytics")
@@ -52,272 +49,37 @@ if uploaded_file:
                         "Colo","3PP Product","3PP Support","SaaS","SW Services",
                         "Ezmeral"]
         aps_cats = ["A&PS","A&PS 3PP","A&PS Colo"]
-
-        # Filter logic for the graphs
-        if view_option == "Products Only":
-            plot_df = results_df[results_df['Category'].isin(product_cats)]
-            table_df = results_df[results_df['Category'].isin(product_cats + ["Total Product"])]
-
-            total_cost = table_df[table_df['Category'] == 'Total Product']['Cost'].values[0]
-            total_revenue = table_df[table_df['Category'] == 'Total Product']['Revenue'].values[0]
-            total_margin = table_df[table_df['Category'] == 'Total Product']['Margin'].values[0]
-            total_percentage = table_df[table_df['Category'] == 'Total Product']['Percentage'].values[0]
-
-        elif view_option == "Services Only":
-            plot_df = results_df[results_df['Category'].isin(service_cats)]
-            table_df = results_df[results_df['Category'].isin(service_cats + ["Total Services"])]
-
-            total_cost = table_df[table_df['Category'] == 'Total Services']['Cost'].values[0]
-            total_revenue = table_df[table_df['Category'] == 'Total Services']['Revenue'].values[0]
-            total_margin = table_df[table_df['Category'] == 'Total Services']['Margin'].values[0]
-            total_percentage = table_df[table_df['Category'] == 'Total Services']['Percentage'].values[0]
-
-        elif view_option == "A&PS Only":
-            plot_df = results_df[results_df['Category'].isin(aps_cats)]
-            table_df = results_df[results_df['Category'].isin(aps_cats + ["Total A&PS"])]
-
-            total_cost = table_df[table_df['Category'] == 'Total A&PS']['Cost'].values[0]
-            total_revenue = table_df[table_df['Category'] == 'Total A&PS']['Revenue'].values[0]
-            total_margin = table_df[table_df['Category'] == 'Total A&PS']['Margin'].values[0]
-            total_percentage = table_df[table_df['Category'] == 'Total A&PS']['Percentage'].values[0]
-            
-
-        else:
-            plot_df = results_df[(results_df['Category'] != "Total Product") & 
-                                 (results_df['Category'] != "Total Services") & 
-                                 (results_df['Category'] != "Total A&PS") & 
-                                 (results_df['Category'] != "Pan HPE") &
-                                 (results_df['Category'] != "Total Products+Services")]
-            
-            table_df = results_df
-
-            total_cost = table_df[table_df['Category'] == 'Pan HPE']['Cost'].values[0]
-            total_revenue = table_df[table_df['Category'] == 'Pan HPE']['Revenue'].values[0]
-            total_margin = table_df[table_df['Category'] == 'Pan HPE']['Margin'].values[0]
-            total_percentage = table_df[table_df['Category'] == 'Pan HPE']['Percentage'].values[0]
-
-        # Remove $0 and 0%     
-        filtered_plot_df = plot_df[(plot_df['Cost'] > 0) | (plot_df['Margin'] != 0)]
-        filtered_table_df = table_df[(table_df['Cost'] > 0) | (table_df['Margin'] != 0)]
+        
+        # Filter logic for the graphs and table
+        filtered_plot_df,filtered_table_df,total_cost, total_revenue,total_margin,total_percentage= view_option_select(view_option,results_df,product_cats,service_cats,aps_cats)
 
         #Graphs
         # Grid Layout 2x2
         if not filtered_table_df.empty:
 
-            # Graph colors
-            colors = get_color_map(filtered_plot_df,product_cats,service_cats,aps_cats)
-
-            # Graph margins
-            margins = dict(l=100, r=30, t=80, b=80)
-
             # Row 1
             row1_col1, row1_col2 = st.columns(2)
 
             with row1_col1:
-                # Bar Chart:
-                if chart_type == "Bar Charts":
-                    fig_cost = px.bar(filtered_plot_df, x='Category', y='Cost', title="Cost by Segment", text_auto='.3s',
-                                    color="Category",color_discrete_map=colors)
-                    fig_cost.update_traces(
-                        texttemplate='$%{y:,.2s}',
-                        textposition='outside',
-                        cliponaxis = False,
-                        hovertemplate="<b>%{label}</b><br>Cost: $%{value:,.2f}<extra></extra>"
-                    )
-                # Pie Chart
-                else: 
-                    fig_cost = px.pie(filtered_plot_df, values='Cost', names='Category', hole=0.5,title="Cost Distribution",
-                                      color='Category', color_discrete_map=colors)
-                    fig_cost.update_traces(textinfo='percent+label',
-                                           textposition='inside',
-                                           insidetextorientation='horizontal',
-                                           textfont=dict(
-                                               weight="bold"
-                                           ),
-                                           hovertemplate="<b>%{label}</b><br>Cost: $%{value:,.2f}<extra></extra>"
-                                           )
-                    fig_cost.update_layout(   uniformtext=dict(
-                                               minsize=8,
-                                               mode='hide'
-                                           )
-                                           )
-                fig_cost.add_trace(go.Scatter(
-                    x=[None],
-                    y=[None],
-                    mode='markers',
-                    marker=dict(size=0),
-                    showlegend=True,
-                    name=f'<b>Total: ${total_cost:,.2f}</b>',
-                    legendgroup='total'
-                    )
-                )  
-                fig_cost.update_layout(title={
-                        'y': 0.95,
-                        'x': 0.5,
-                        'xanchor': 'center',
-                        'yanchor': 'top',
-                        }, 
-                        margin=margins,
-                        title_font=dict(size=20))
-                fig_cost.update_yaxes(tickprefix="$", title_text="Cost (USD)")
-                st.plotly_chart(fig_cost,width='stretch')
+                graph_type_selector(filtered_plot_df,chart_type,'Cost',total_cost, total_revenue,total_margin,total_percentage)
             
             with row1_col2:
-                # Bar Chart
-                if chart_type == "Bar Charts":
-                    fig_cost = px.bar(filtered_plot_df, x='Category', y='Revenue', title="Revenue by Segment", text_auto='.3s',
-                                    color="Category",color_discrete_map=colors)
-                    fig_cost.update_traces(
-                        texttemplate='$%{y:,.2s}',
-                        textposition='outside',
-                        cliponaxis = False,
-                        hovertemplate="<b>%{label}</b><br>Revenue: $%{value:,.2f}<extra></extra>"
-                    )
-                else: 
-                    fig_cost = px.pie(filtered_plot_df, values='Revenue', names='Category', hole=0.5,title="Revenue Distribution",
-                                      color='Category', color_discrete_map=colors)
-                    fig_cost.update_traces(textinfo='percent+label',
-                                           textposition='inside',
-                                           insidetextorientation='horizontal',
-                                           textfont=dict(
-                                               weight="bold"
-                                           ),
-                                           hovertemplate="<b>%{label}</b><br>Revenue: $%{value:,.2f}<extra></extra>"
-                                           )
-                    fig_cost.update_layout(   uniformtext=dict(
-                                               minsize=8,
-                                               mode='hide'
-                                           )
-                                           )
-                fig_cost.add_annotation(
-                    text=f'<b>Total Revenue</b><br>${total_revenue:,.2f}',
-                    font=dict(size=13.5),
-                    xref="paper", yref="paper",
-                    x=1.21, y=1.21,
-                    xanchor = 'right',
-                    yanchor= 'top',
-                    showarrow=False,
-                    align="center"
-                )     
-                fig_cost.update_layout(title={
-                    'y': 0.95,
-                    'x': 0.5,
-                    'xanchor': 'center',
-                    'yanchor': 'top'
-                    }, 
-                    margin=margins,
-                    title_font=dict(size=20))
-                fig_cost.update_yaxes(tickprefix="$", title_text="Revenue (USD)")
-                st.plotly_chart(fig_cost,width='stretch')
+                graph_type_selector(filtered_plot_df,chart_type,'Revenue',total_cost, total_revenue,total_margin,total_percentage)
 
             # Row 2
             row2_col1, row2_col2 = st.columns(2)
 
             with row2_col1:
-                # Bar Chart:
-                if chart_type == "Bar Charts":
-                    fig_cost = px.bar(filtered_plot_df, x='Category', y='Margin', title="FLGM Pre-rebate by Segment", text_auto='.3s',
-                                    color="Category",color_discrete_map=colors)
-                    fig_cost.update_traces(
-                        texttemplate='$%{y:,.2s}',
-                        textposition='outside',
-                        cliponaxis = False,
-                        hovertemplate="<b>%{label}</b><br>Margin: $%{value:,.2f}<extra></extra>"
-                    )
-                else: 
-                    fig_cost = px.pie(filtered_plot_df, values='Margin', names='Category', hole=0.5,title="Margin Distribution",
-                                      color='Category', color_discrete_map=colors)
-                    fig_cost.update_traces(textinfo='percent+label',
-                                           textposition='inside',
-                                           insidetextorientation='horizontal',
-                                           textfont=dict(
-                                               weight="bold"
-                                           ),
-                                           hovertemplate="<b>%{label}</b><br>Margin: $%{value:,.2f}<extra></extra>"
-                                           )
-                    fig_cost.update_layout(   uniformtext=dict(
-                                               minsize=8,
-                                               mode='hide'
-                                           )
-                                           )
-                fig_cost.add_annotation(
-                    text=f'<b>Total FLGM</b><br><b>Pre-rebate</b><br>${total_margin:,.2f}',
-                    font=dict(size=13),
-                    xref="paper", yref="paper",
-                    x=1.21, y=1.21,
-                    xanchor = 'right',
-                    yanchor= 'top',
-                    showarrow=False,
-                    align="center"
-                ) 
-                fig_cost.update_layout(title={
-                    'y': 0.95,
-                    'x': 0.5,
-                    'xanchor': 'center',
-                    'yanchor': 'top'
-                    }, 
-                    margin=margins,
-                    title_font=dict(size=20))
-                fig_cost.update_yaxes(tickprefix="$", title_text="Margin(USD)")
-                st.plotly_chart(fig_cost,width='stretch')
-            
+                graph_type_selector(filtered_plot_df,chart_type,'Margin',total_cost, total_revenue,total_margin,total_percentage)
+        
             with row2_col2:
-                # Bar Chart only
-                if chart_type == "Bar Charts":
-                    fig_cost = px.bar(filtered_plot_df, x='Category', y='Percentage', title="FLGM% Pre-rebate by Segment", text_auto= '.2f',
-                                    color="Category",color_discrete_map=colors)
-                    fig_cost.update_traces(
-                        texttemplate='%{y:,.2s}%',
-                        textposition='outside',
-                        cliponaxis = False,
-                        hovertemplate="<b>%{label}</b><br>FLGM%: %{value:,.2f}%<extra></extra>"
-                    )
-                    fig_cost.add_annotation(
-                    text=f'<b>Total FLGM%</b><br><b>Pre-rebate</b><br>{total_percentage:,.2f}%',
-                    font=dict(size=13),
-                    xref="paper", yref="paper",
-                    x=1.21, y=1.21,
-                    xanchor = 'right',
-                    yanchor= 'top',
-                    showarrow=False,
-                    align="center"
-                )
-                    fig_cost.update_layout(title={
-                        'y': 0.9,
-                        'x': 0.5,
-                        'xanchor': 'center',
-                        'yanchor': 'top'
-                        }, 
-                        margin=margins,
-                        title_font=dict(size=20))
-                    fig_cost.update_yaxes(ticksuffix="%", title_text="Margin (%)")
-                    st.plotly_chart(fig_cost,width='stretch')
-
-
+                graph_type_selector(filtered_plot_df,chart_type,'Percentage',total_cost, total_revenue,total_margin,total_percentage)
+                    
         # Summary Table
         st.write("### Data Summary")
 
         if not filtered_table_df.empty:
-            html_table = (
-                filtered_table_df.style
-                .apply(set_row_style, axis=1)
-                .format({
-                    "Cost": "${:,.2f}",
-                    "Revenue": "${:,.2f}",
-                    "Margin": "${:,.2f}",
-                    "Percentage": "{:,.2f}%"
-                })
-                .hide(axis='index')
-                .to_html()
-            )
-
-            # Reemplazar los encabezados en el HTML
-            html_table = html_table.replace(">Cost<", ">Costs<") \
-                                .replace(">Revenue<", ">Revenue<") \
-                                .replace(">Margin<", ">FLGM Pre-rebate<")\
-                                .replace(">Percentage<", ">FLGM% Pre-rebate<")\
-
-
+            html_table = table_generation(filtered_table_df)
         st.markdown(html_table, unsafe_allow_html=True)
 
     except Exception as e:
