@@ -1,6 +1,7 @@
 import streamlit as st 
 from PIL import Image
-from processing import local_css,dynamic_options_selector, load_data, resource_path,view_option_select,graph_type_selector,table_generation
+from functions.processing import local_css,dynamic_options_selector, load_data, resource_path,view_option_select
+from functions.graphicator import graph_type_selector,table_generation
 
 icon_path = resource_path("assets/HPE_icon.webp")
 
@@ -44,14 +45,8 @@ if uploaded_file:
         with col_filter2:
             chart_type = st.selectbox("Chart Style",["Bar Charts","Donut Charts"])
 
-        product_cats = ["HPC-AI","Compute","Storage","Software","3P/OEM"]
-        service_cats = ["Installation","Support", "Complete Care","Managed Services",
-                        "Colo","3PP Product","3PP Support","SaaS","SW Services",
-                        "Ezmeral"]
-        aps_cats = ["A&PS","A&PS 3PP","A&PS Colo"]
-        
         # Filter logic for the graphs and table
-        filtered_plot_df,filtered_table_df,total_cost, total_revenue,total_margin,total_percentage= view_option_select(view_option,results_df,product_cats,service_cats,aps_cats)
+        filtered_plot_df,filtered_table_df,total_cost, total_revenue,total_margin,total_percentage= view_option_select(view_option,results_df)
 
         #Graphs
         # Grid Layout 2x2

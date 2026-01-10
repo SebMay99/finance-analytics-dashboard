@@ -12,15 +12,21 @@ TODO v0.1
 
 TODO v0.2
 1. ~~Fix what if no A&PS/Product/SW?~~
-2. Generate PDF export
-3. Generate Email export
-4. Improve table color by category
 
 TODO v0.3
 1. ~~Force Dark Mode~~
-2. Add After Rebate Info and logic
 3. ~~Add a total to the graphs~~
 4. ~~Add percentage to the overlay with mouse~~
-5. Optimize get_color_map()
-6. Separate graph and table generation functions in their own .py
-7. Don't show Total Products+Services in the table if there's no A&PS (Redudant)
+
+TODO v0.4
+1. Generate PDF export
+2. Generate Email export
+3. Improve table color by category
+4. Add After Rebate Info and logic
+5. ~~Optimize get_color_map()~~
+6. ~~Separate graph and table generation functions in their own .py~~
+7. ~~Don't show Total Products+Services in the table if there's no A&PS (Redudant)~~
+8. Generate PPT export
+9. Don't render a new table if the view changes from bar to donuts (?)
+10. Don't render donuts if there are negative values or % (Works but looks broken)
+

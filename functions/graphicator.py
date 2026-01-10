@@ -1,19 +1,7 @@
-import streamlit as st 
 import plotly.express as px
-import pandas as pd
-import sys
-import os
 import plotly.graph_objects as go
-
-def resource_path(relative_path):
-    if hasattr(sys, '_MEIPASS'):
-        return os.path.join(sys._MEIPASS, relative_path)
-    return os.path.join(os.path.abspath("."), relative_path)
-
-# Load CSS
-def local_css(file_name):
-    with open(resource_path(file_name)) as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+import streamlit as st 
+from public import config
 
 def set_row_style(row):
     cat = str(row.Category).upper().strip()
@@ -26,14 +14,7 @@ def set_row_style(row):
     return [''] * len(row)
 
 def get_color_map(df):
-
-    product_cats = ["HPC-AI","Compute","Storage","Software","3P/OEM"]
-    service_cats = ["Installation","Support", "Complete Care","Managed Services",
-                    "Colo","3PP Product","3PP Support","SaaS","SW Services",
-                    "Ezmeral"]
-    aps_cats = ["A&PS","A&PS 3PP","A&PS Colo"]
-
-
+    
     color_map = {}
     # Color scales
     greens = ["#01A982", "#05CC93", "#00E0AF", "#00B88A", "#009F73"]
@@ -44,131 +25,17 @@ def get_color_map(df):
     g_idx, y_idx, p_idx = 0, 0, 0
 
     for cat in df['Category'].unique():
-        if cat in product_cats:
+        if cat in config.product_cats:
             color_map[cat] = greens[g_idx % len(greens)]
             g_idx += 1
-        elif cat in service_cats:
+        elif cat in config.service_cats:
             color_map[cat] = blues[y_idx % len(blues)]
             y_idx += 1
-        elif cat in aps_cats:
+        elif cat in config.aps_cats: 
             color_map[cat] = purples[p_idx % len(purples)]
             p_idx += 1
         
     return color_map
-
-def dynamic_options_selector(results_df):
-    # Check if product 
-    prod_total_row = results_df[results_df['Category'] == 'Total Product']
-    total_prod_cost = prod_total_row['Cost'].values[0] if not prod_total_row.empty else 0
-
-    # Check if services
-    serv_total_row = results_df[results_df['Category'] == 'Total Services']
-    total_serv_cost = serv_total_row['Cost'].values[0] if not serv_total_row.empty else 0
-
-    # Check if aps 
-    aps_total_row = results_df[results_df['Category'] == 'Total A&PS']
-    total_aps_cost = aps_total_row['Cost'].values[0] if not aps_total_row.empty else 0
-
-    #Dinamic options list
-    available_options =["All"]
-
-    if total_prod_cost > 0:
-        available_options.append("Products Only")
-
-    if total_serv_cost > 0:
-        available_options.append("Services Only")
-
-    if total_aps_cost > 0:
-        available_options.append("A&PS Only")
-
-    return available_options
-
-@st.cache_data # Cache the Excel file
-def load_data(uploaded_file):
-    # Load the All Reports as a DF and Check if it's a custom file
-    try:
-        sheet_name = "PL_MGMT Edit"
-        df = pd.read_excel(uploaded_file,sheet_name=sheet_name, engine='openpyxl')
-        st.success("Custom File Loaded")
-    
-    except:
-        sheet_name = "PL_MGMT"
-        df = pd.read_excel(uploaded_file,sheet_name=sheet_name, engine='openpyxl')
-        st.success("File Loaded")
-
-    # Cell Mapping for Day 1 financial information
-    costs = df.iloc[44, 1:24].tolist()
-    revenues = df.iloc[42, 1:24].tolist()
-    margins = df.iloc[45, 1:24].tolist()
-    percentages = df.iloc[46, 1:24].tolist()
-
-    # Data Transformation
-    processed_costs = [cost * 1000 for cost in costs]
-    processed_revenue = [revenue * 1000 for revenue in revenues]
-    processed_margin = [margin * 1000 for margin in margins]
-    processed_margin_percentage = [percentage * 100 for percentage in percentages]
-
-    data = {
-        "Category": ["HPC-AI","Compute","Storage","Software","3P/OEM","Total Product","Installation","Support",
-                        "Complete Care","Managed Services","Colo","3PP Product","3PP Support","SaaS","SW Services",
-                        "Ezmeral","Total Services","Total Products+Services","A&PS","A&PS 3PP","A&PS Colo","Total A&PS","Pan HPE"],
-        "Cost": processed_costs,
-        "Revenue": processed_revenue,
-        "Margin": processed_margin,
-        "Percentage": processed_margin_percentage
-    }
-
-    results_df = pd.DataFrame(data)
-    return results_df
-
-def view_option_select(view_option,results_df,product_cats,service_cats,aps_cats):
-    # Filter logic for the graphs
-    if view_option == "Products Only":
-        plot_df = results_df[results_df['Category'].isin(product_cats)]
-        table_df = results_df[results_df['Category'].isin(product_cats + ["Total Product"])]
-
-        total_cost = table_df[table_df['Category'] == 'Total Product']['Cost'].values[0]
-        total_revenue = table_df[table_df['Category'] == 'Total Product']['Revenue'].values[0]
-        total_margin = table_df[table_df['Category'] == 'Total Product']['Margin'].values[0]
-        total_percentage = table_df[table_df['Category'] == 'Total Product']['Percentage'].values[0]
-
-    elif view_option == "Services Only":
-        plot_df = results_df[results_df['Category'].isin(service_cats)]
-        table_df = results_df[results_df['Category'].isin(service_cats + ["Total Services"])]
-
-        total_cost = table_df[table_df['Category'] == 'Total Services']['Cost'].values[0]
-        total_revenue = table_df[table_df['Category'] == 'Total Services']['Revenue'].values[0]
-        total_margin = table_df[table_df['Category'] == 'Total Services']['Margin'].values[0]
-        total_percentage = table_df[table_df['Category'] == 'Total Services']['Percentage'].values[0]
-
-    elif view_option == "A&PS Only":
-        plot_df = results_df[results_df['Category'].isin(aps_cats)]
-        table_df = results_df[results_df['Category'].isin(aps_cats + ["Total A&PS"])]
-
-        total_cost = table_df[table_df['Category'] == 'Total A&PS']['Cost'].values[0]
-        total_revenue = table_df[table_df['Category'] == 'Total A&PS']['Revenue'].values[0]
-        total_margin = table_df[table_df['Category'] == 'Total A&PS']['Margin'].values[0]
-        total_percentage = table_df[table_df['Category'] == 'Total A&PS']['Percentage'].values[0]
-        
-
-    else:
-        plot_df = results_df[(results_df['Category'] != "Total Product") & 
-                                (results_df['Category'] != "Total Services") & 
-                                (results_df['Category'] != "Total A&PS") & 
-                                (results_df['Category'] != "Pan HPE") &
-                                (results_df['Category'] != "Total Products+Services")]
-        
-        table_df = results_df
-
-        total_cost = table_df[table_df['Category'] == 'Pan HPE']['Cost'].values[0]
-        total_revenue = table_df[table_df['Category'] == 'Pan HPE']['Revenue'].values[0]
-        total_margin = table_df[table_df['Category'] == 'Pan HPE']['Margin'].values[0]
-        total_percentage = table_df[table_df['Category'] == 'Pan HPE']['Percentage'].values[0]
-
-    # Remove $0 and 0%     
-    filtered_plot_df = plot_df[(plot_df['Cost'] > 0) | (plot_df['Margin'] != 0)]
-    filtered_table_df = table_df[(table_df['Cost'] > 0) | (table_df['Margin'] != 0)]
-    return filtered_plot_df,filtered_table_df,total_cost, total_revenue,total_margin,total_percentage
 
 def graph_type_selector(filtered_plot_df,chart_type,graph_type,total_cost, 
                         total_revenue,total_margin,total_percentage):
@@ -287,11 +154,11 @@ def bar_graph_generation(filtered_plot_df,colors,margins,graph_type,
 def pie_graph_generation(filtered_plot_df, colors, margins, graph_type,
                          total_cost, total_revenue, total_margin):
 
-    # No generar gráfico si es Percentage
+    # No pie graph for Percentage
     if graph_type == 'Percentage':
         return None
 
-    # Configuración por tipo de gráfico
+    # Config by graph type
     config = {
         "Cost": {
             "title": "Cost Distribution",
@@ -317,7 +184,7 @@ def pie_graph_generation(filtered_plot_df, colors, margins, graph_type,
     cfg = config[graph_type]
     total_label = cfg["total_label"](cfg["total"])
 
-    # Crear gráfico
+    # Create graph
     fig = px.pie(
         filtered_plot_df,
         values=graph_type,
@@ -336,7 +203,7 @@ def pie_graph_generation(filtered_plot_df, colors, margins, graph_type,
         hovertemplate=cfg["hover"]
     )
 
-    # Añadir total como elemento de leyenda
+    # Add total at the end of the legend
     fig.add_trace(go.Scatter(
         x=[None], y=[None],
         mode='markers',
@@ -373,7 +240,7 @@ def table_generation(filtered_table_df):
                 .to_html()
             )
 
-    # Reemplazar los encabezados en el HTML
+    # Change HTML headers
     html_table = html_table.replace(">Cost<", ">Costs<") \
                         .replace(">Revenue<", ">Revenue<") \
                         .replace(">Margin<", ">FLGM Pre-rebate<")\
