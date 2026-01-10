@@ -1,22 +1,29 @@
-# Activate virtual enviroment
+# Setup instructions
 
-.\.venv\Scripts\activate     
+Follow these instrucctions to clone the repo and install the required libraries to run and compile the app.
+
+## 1.Clone the repository to your machine
+## 2.Create a local virtual enviroment inside your project folder
+`python -m venv .venv`
+## 3.Activate virtual enviroment
+`.\.venv\Scripts\activate`
+## 4.Install the libraries in requirements.txt 
+`pip install -r requirements.txt`
+
+# Run Streamlit local server
+
+For testing and debuggin run to try the app in a local browser:
+
+`streamlit run app.py`
 
 # Compile Python code into a distributable .exe
 
 To compile the code into an .exe run:
 
-streamlit-desktop-app build app.py --name HPE_Financial_App_v0.2 --icon .\assets\HPE_icon.png --pyinstaller-options --add-data "processing.py;." --add-data "assets\HPE_icon.webp;assets" --add-data "style.css;." --add-data ".streamlit/config.toml;.streamlit" --onedir --noconsole --noconfirm --clean 
+`streamlit-desktop-app build app.py --name HPE_Financial_App_v0.3 --icon .\assets\HPE_icon.png --pyinstaller-options --add-data "functions\processing.py;functions" --add-data "assets\HPE_icon.webp;assets" --add-data "style.css;." --add-data ".streamlit/config.toml;.streamlit" --add-data "functions\processing.py;functions" --add-data "public/config.py;public" --onedir --noconsole --noconfirm --clean`
 
-# Run Streamlit local server
-
-For testing and debuggin run:
-
-streamlit run app.py
-
-# Data Frame examples for debuggin
 ## TODO
-
+# Data Frame examples for debuggin
 ### filtered_table_df
 
 |index     | Category |   Cost   | Revenue  |  Margin  | Percentage |
