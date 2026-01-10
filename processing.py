@@ -111,3 +111,11 @@ def load_data(uploaded_file):
 
     results_df = pd.DataFrame(data)
     return results_df
+
+def graph_generation():
+    fig = "Something Here"
+    return fig
+
+def view_option_select():
+    something = "Something"
+    return something

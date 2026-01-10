@@ -1,7 +1,8 @@
 import streamlit as st 
 from PIL import Image
 import plotly.express as px
-from processing import local_css, set_row_style, get_color_map, dynamic_options_selector, load_data, resource_path
+import plotly.graph_objects as go
+from processing import local_css, set_row_style, get_color_map, dynamic_options_selector, load_data, resource_path, graph_generation, view_option_select
 
 icon_path = resource_path("assets/HPE_icon.webp")
 
@@ -140,16 +141,16 @@ if uploaded_file:
                                                mode='hide'
                                            )
                                            )
-                fig_cost.add_annotation(
-                    text=f'<b>Total Cost</b><br>${total_cost:,.2f}',
-                    font=dict(size=14),
-                    xref="x domain", yref="y domain",
-                    x=1.21, y=1.21,
-                    xanchor = 'right',
-                    yanchor= 'top',
-                    showarrow=False,
-                    align="center"
-                )    
+                fig_cost.add_trace(go.Scatter(
+                    x=[None],
+                    y=[None],
+                    mode='markers',
+                    marker=dict(size=0),
+                    showlegend=True,
+                    name=f'<b>Total: ${total_cost:,.2f}</b>',
+                    legendgroup='total'
+                    )
+                )  
                 fig_cost.update_layout(title={
                         'y': 0.95,
                         'x': 0.5,
