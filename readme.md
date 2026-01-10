@@ -1,29 +1,41 @@
-# Setup instructions
+Checkout the **Releases** page for the latest executable. 
 
+# Setup instructions
 Follow these instrucctions to clone the repo and install the required libraries to run and compile the app.
 
-## 1.Clone the repository to your machine
-## 2.Create a local virtual enviroment inside your project folder
+### 1. Clone the repository to your machine
+Go into your local directory
+`cd path/to/your/local/directory`
+
+Clone the repository into your directory
+`git clone https://github.com/SebMay99/business-intelligence.git`
+
+Go into the project folder
+`cd business-intelligence`
+
+### 2. Create a local virtual enviroment inside your project folder
+This is recommended to keep the project libraries separate from the rest of the system
 `python -m venv .venv`
-## 3.Activate virtual enviroment
+
+### 3. Activate virtual enviroment
 `.\.venv\Scripts\activate`
-## 4.Install the libraries in requirements.txt 
+### 4. Install the libraries in requirements.txt 
 `pip install -r requirements.txt`
 
 # Run Streamlit local server
-
-For testing and debuggin run to try the app in a local browser:
+For testing and debugging run to try the app in a local browser:
 
 `streamlit run app.py`
 
 # Compile Python code into a distributable .exe
-
 To compile the code into an .exe run:
 
-`streamlit-desktop-app build app.py --name HPE_Financial_App_v0.3 --icon .\assets\HPE_icon.png --pyinstaller-options --add-data "functions\processing.py;functions" --add-data "assets\HPE_icon.webp;assets" --add-data "style.css;." --add-data ".streamlit/config.toml;.streamlit" --add-data "functions\processing.py;functions" --add-data "public/config.py;public" --onedir --noconsole --noconfirm --clean`
+`streamlit-desktop-app build app.py --name HPE_Financial_App_v0.3 --icon .\assets\HPE_icon.png --pyinstaller-options --add-data "functions\processing.py;functions" --add-data "assets\HPE_icon.webp;assets" --add-data "style.css;." --add-data ".streamlit/config.toml;.streamlit" --add-data "functions\processing.py;functions" --add-data "public/config.py;public" --add-data "functions\graphicator.py;functions"  --onedir --noconsole --noconfirm --clean`
+
+Each file and asset has to be specified, otherwise it won't be included in the compilation and the .exe won't work. 
 
 ## TODO
-# Data Frame examples for debuggin
+# Data Frame examples for debugging
 ### filtered_table_df
 
 |index     | Category |   Cost   | Revenue  |  Margin  | Percentage |
