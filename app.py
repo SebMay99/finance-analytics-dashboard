@@ -31,12 +31,12 @@ uploaded_file = st.file_uploader("Upload your All Reports Excel file", type=["xl
 
 if uploaded_file:
     try:
-    
-        # Visualization
-        st.write("### 2.Financial Analysis Breakdown")
-
+        
         # Load Excel file to memory
         day1_df,growth_df = load_data(uploaded_file)
+        
+        # Visualization
+        st.write("### 2.Financial Analysis Breakdown")
 
         # Switch between Day 1 and Growth scenarios
         scenario_option = st.selectbox("Select Sceneario", ["Day 1","Growth"])
