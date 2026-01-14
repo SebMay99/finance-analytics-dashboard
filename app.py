@@ -31,11 +31,22 @@ uploaded_file = st.file_uploader("Upload your All Reports Excel file", type=["xl
 
 if uploaded_file:
     try:
-        results_df = load_data(uploaded_file)
-        available_options = dynamic_options_selector(results_df)
-
+    
         # Visualization
         st.write("### 2.Financial Analysis Breakdown")
+
+        # Load Excel file to memory
+        day1_df,growth_df = load_data(uploaded_file)
+
+        # Switch between Day 1 and Growth scenarios
+        scenario_option = st.selectbox("Select Sceneario", ["Day 1","Growth"])
+        if scenario_option == "Day 1":
+            results_df = day1_df
+        elif scenario_option == "Growth":
+            results_df = growth_df
+
+        # Select Segments view
+        available_options = dynamic_options_selector(results_df)
 
         col_filter1, col_filter2 = st.columns(2)
 

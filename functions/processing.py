@@ -14,6 +14,46 @@ def local_css(file_name):
     with open(resource_path(file_name)) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
+
+def financial_retrieval(costs,revenues,margins,percentages):
+
+    # Data Transformation
+    processed_costs = [cost * 1000 for cost in costs]
+    processed_revenue = [revenue * 1000 for revenue in revenues]
+    processed_margin = [margin * 1000 for margin in margins]
+    processed_margin_percentage = [percentage * 100 for percentage in percentages]
+
+    data = {
+        "Category": ["HPC-AI","Compute","Storage","Software","3P/OEM","Total Product","Installation","Support",
+                        "Complete Care","Managed Services","Colo","3PP Product","3PP Support","SaaS","SW Services",
+                        "Ezmeral","Total Services","Total Products+Services","A&PS","A&PS 3PP","A&PS Colo","Total A&PS","Pan HPE"],
+        "Cost": processed_costs,
+        "Revenue": processed_revenue,
+        "Margin": processed_margin,
+        "Percentage": processed_margin_percentage
+    }
+
+    return pd.DataFrame(data)
+
+def pl_mgmt_read(df):
+
+    # Cell Mapping for Day 1 financial information
+    day1_costs = df.iloc[44, 1:24].tolist()
+    day1_revenues = df.iloc[42, 1:24].tolist()
+    day1_margins = df.iloc[45, 1:24].tolist()
+    day1_percentages = df.iloc[46, 1:24].tolist()
+
+    # Cell Mapping for Growth financial information
+    growth_costs = df.iloc[27, 1:24].tolist()
+    growth_revenues = df.iloc[25, 1:24].tolist()
+    growth_margins = df.iloc[28, 1:24].tolist()
+    growth_percentages = df.iloc[29, 1:24].tolist()
+    
+    day1_results_df = financial_retrieval(day1_costs,day1_revenues,day1_margins,day1_percentages)
+    growth_results_df = financial_retrieval(growth_costs,growth_revenues,growth_margins,growth_percentages)
+
+    return day1_results_df, growth_results_df
+
 def dynamic_options_selector(results_df):
     # Check if product 
     prod_total_row = results_df[results_df['Category'] == 'Total Product']
@@ -54,30 +94,9 @@ def load_data(uploaded_file):
         df = pd.read_excel(uploaded_file,sheet_name=sheet_name, engine='openpyxl')
         st.success("File Loaded")
 
-    # Cell Mapping for Day 1 financial information
-    costs = df.iloc[44, 1:24].tolist()
-    revenues = df.iloc[42, 1:24].tolist()
-    margins = df.iloc[45, 1:24].tolist()
-    percentages = df.iloc[46, 1:24].tolist()
+    day1_df,growth_df = pl_mgmt_read(df)
 
-    # Data Transformation
-    processed_costs = [cost * 1000 for cost in costs]
-    processed_revenue = [revenue * 1000 for revenue in revenues]
-    processed_margin = [margin * 1000 for margin in margins]
-    processed_margin_percentage = [percentage * 100 for percentage in percentages]
-
-    data = {
-        "Category": ["HPC-AI","Compute","Storage","Software","3P/OEM","Total Product","Installation","Support",
-                        "Complete Care","Managed Services","Colo","3PP Product","3PP Support","SaaS","SW Services",
-                        "Ezmeral","Total Services","Total Products+Services","A&PS","A&PS 3PP","A&PS Colo","Total A&PS","Pan HPE"],
-        "Cost": processed_costs,
-        "Revenue": processed_revenue,
-        "Margin": processed_margin,
-        "Percentage": processed_margin_percentage
-    }
-
-    results_df = pd.DataFrame(data)
-    return results_df
+    return day1_df,growth_df
 
 def view_option_select(view_option,results_df):
     # Filter logic for the graphs
