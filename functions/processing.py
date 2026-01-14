@@ -150,6 +150,8 @@ def load_data(uploaded_file):
 
     day1_df,growth_df  = pl_mgmt_read(df)
     sales_motion = model_header_read(df)
+    day1_rebate = 0
+    growth_rebate = 0
 
     if sales_motion == "Indirect":
         day1_rebate, growth_rebate = rebate_read(df)
