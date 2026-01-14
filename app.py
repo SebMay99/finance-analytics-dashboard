@@ -34,7 +34,7 @@ if uploaded_file:
         
         # Load Excel file to memory
         day1_df,growth_df = load_data(uploaded_file)
-        
+
         # Visualization
         st.write("### 2.Financial Analysis Breakdown")
 
@@ -67,19 +67,19 @@ if uploaded_file:
             row1_col1, row1_col2 = st.columns(2)
 
             with row1_col1:
-                graph_type_selector(filtered_plot_df,chart_type,'Cost',total_cost, total_revenue,total_margin,total_percentage)
+                graph_type_selector(filtered_plot_df,chart_type,'Cost',total_cost, total_revenue,total_margin,total_percentage,scenario_option,view_option)
             
             with row1_col2:
-                graph_type_selector(filtered_plot_df,chart_type,'Revenue',total_cost, total_revenue,total_margin,total_percentage)
+                graph_type_selector(filtered_plot_df,chart_type,'Revenue',total_cost, total_revenue,total_margin,total_percentage,scenario_option,view_option)
 
             # Row 2
             row2_col1, row2_col2 = st.columns(2)
 
             with row2_col1:
-                graph_type_selector(filtered_plot_df,chart_type,'Margin',total_cost, total_revenue,total_margin,total_percentage)
+                graph_type_selector(filtered_plot_df,chart_type,'Margin',total_cost, total_revenue,total_margin,total_percentage,scenario_option,view_option)
         
             with row2_col2:
-                graph_type_selector(filtered_plot_df,chart_type,'Percentage',total_cost, total_revenue,total_margin,total_percentage)
+                graph_type_selector(filtered_plot_df,chart_type,'Percentage',total_cost, total_revenue,total_margin,total_percentage,scenario_option,view_option)
                     
         # Summary Table
         st.write("### Data Summary")
