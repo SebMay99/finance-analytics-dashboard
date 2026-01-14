@@ -35,6 +35,12 @@ def financial_retrieval(costs,revenues,margins,percentages):
 
     return pd.DataFrame(data)
 
+def model_header_read(df):
+
+    print(df)
+    sales_motion = df.iloc[1,8]
+
+    return sales_motion
 def pl_mgmt_read(df):
 
     # Cell Mapping for Day 1 financial information
@@ -94,9 +100,10 @@ def load_data(uploaded_file):
         df = pd.read_excel(uploaded_file,sheet_name=sheet_name, engine='openpyxl')
         st.success("File Loaded")
 
-    day1_df,growth_df = pl_mgmt_read(df)
+    day1_df,growth_df  = pl_mgmt_read(df)
+    sales_motion = model_header_read(df)
 
-    return day1_df,growth_df
+    return day1_df,growth_df,sales_motion 
 
 def view_option_select(view_option,results_df):
     # Filter logic for the graphs

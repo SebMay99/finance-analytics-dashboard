@@ -38,28 +38,38 @@ def get_color_map(df):
     return color_map
 
 def graph_type_selector(filtered_plot_df,chart_type,graph_type,total_cost, 
-                        total_revenue,total_margin,total_percentage):
+                        total_revenue,total_margin,total_percentage,scenario,segment):
     # Graph colors
     colors = get_color_map(filtered_plot_df)
 
     # Graph margins
     margins = dict(l=100, r=30, t=80, b=80)
 
+    # Normalize for graph title
+    if segment == "All":
+        segment = " "
+    elif segment == "Products Only":
+        segment = " Product "
+    elif segment == "Services Only":
+        segment = " Service "
+    elif segment == "A&PS Only":
+        segment = " A&PS "
+
     if chart_type == "Bar Charts":
         bar_graph_generation(filtered_plot_df,colors,margins,graph_type,
-                             total_cost, total_revenue,total_margin,total_percentage)
+                             total_cost, total_revenue,total_margin,total_percentage,scenario,segment)
     elif chart_type == "Donut Charts":
         pie_graph_generation(filtered_plot_df,colors,margins,graph_type,
-                             total_cost, total_revenue,total_margin)
+                             total_cost, total_revenue,total_margin,scenario,segment)
 
 def bar_graph_generation(filtered_plot_df,colors,margins,graph_type,
-                         total_cost, total_revenue,total_margin,total_percentage):
+                         total_cost, total_revenue,total_margin,total_percentage,scenario,segment):
     
     # Config by type of graph
     config = {
         "Cost": {
             "total": total_cost,
-            "title": "Cost by Segment",
+            "title": f"{scenario} Cost by{segment}Segment",
             "hover": "%{label}: %{value:,.2f}<extra></extra>",
             "text": "$%{y:,.2f}",
             "yaxis_prefix": "$",
@@ -68,7 +78,7 @@ def bar_graph_generation(filtered_plot_df,colors,margins,graph_type,
         },
         "Margin": {
             "total": total_margin,
-            "title": "Pan HPE FLGM Pre-rebate by Segment",
+            "title": f"{scenario} Pan HPE FLGM Pre-rebate by{segment}Segment",
             "hover": "%{label}: %{value:,.2f}<extra></extra>",
             "text": "$%{y:,.2f}",
             "yaxis_prefix": "$",
@@ -77,7 +87,7 @@ def bar_graph_generation(filtered_plot_df,colors,margins,graph_type,
         },
         "Revenue": {
             "total": total_revenue,
-            "title": "Revenue by Segment",
+            "title": f"{scenario} Revenue by{segment}Segment",
             "hover": "%{label}: %{value:,.2f}<extra></extra>",
             "text": "$%{y:,.2f}",
             "yaxis_prefix": "$",
@@ -86,7 +96,7 @@ def bar_graph_generation(filtered_plot_df,colors,margins,graph_type,
         },
         "Percentage": {
             "total": total_percentage,
-            "title": "Pan HPE FLGM% Pre-rebate by Segment",
+            "title": f"{scenario} Pan HPE FLGM% Pre-rebate by{segment}Segment",
             "hover": "%{label}: %{value:,.2f}%<extra></extra>",
             "text": "%{y:.2f}%",
             "yaxis_prefix": "",
@@ -152,7 +162,7 @@ def bar_graph_generation(filtered_plot_df,colors,margins,graph_type,
     return fig
 
 def pie_graph_generation(filtered_plot_df, colors, margins, graph_type,
-                         total_cost, total_revenue, total_margin):
+                         total_cost, total_revenue, total_margin,scenario,segment):
 
     # No pie graph for Percentage
     if graph_type == 'Percentage':
@@ -161,19 +171,19 @@ def pie_graph_generation(filtered_plot_df, colors, margins, graph_type,
     # Config by graph type
     config = {
         "Cost": {
-            "title": "Cost Distribution",
+            "title": f"{scenario}{segment}Cost Distribution",
             "hover": "<b>%{label}</b><br>Cost: $%{value:,.2f}<br>% out of total: %{percent:.2%}<extra></extra>",
             "total": total_cost,
             "total_label": lambda t: f"<b>Total: ${t:,.2f}</b>"
         },
         "Margin": {
-            "title": "Pan HPE FLGM Pre-rebate Distribution",
+            "title": f"{scenario}{segment}Pan HPE FLGM Pre-rebate Distribution",
             "hover": "<b>%{label}</b><br>Margin: $%{value:,.2f}<br>% out of total: %{percent:.2%}<extra></extra>",
             "total": total_margin,
             "total_label": lambda t: f"<b>Total: ${t:,.2f}</b>"
         },
         "Revenue": {
-            "title": "Revenue Distribution",
+            "title": f"{scenario}{segment}Revenue Distribution",
             "hover": "<b>%{label}</b><br>Revenue: $%{value:,.2f}<br>% out of total: %{percent:.2%}<extra></extra>",
             "total": total_revenue,
             "total_label": lambda t: f"<b>Total: ${t:,.2f}</b>"
@@ -215,8 +225,9 @@ def pie_graph_generation(filtered_plot_df, colors, margins, graph_type,
 
     fig.update_layout(
         margin=margins,
-        uniformtext=dict(minsize=8, mode='hide'),
-        title={'y': 0.95, 'x': 0.5, 'xanchor': 'center'}
+        uniformtext=dict(minsize=10, mode='hide'),
+        title={'y': 0.95, 'x': 0.5, 'xanchor': 'center'},
+        title_font=dict(size=20)
     )
 
     fig.update_xaxes(visible=False)
