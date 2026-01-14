@@ -37,7 +37,6 @@ def financial_retrieval(costs,revenues,margins,percentages):
 
 def model_header_read(df):
 
-    print(df)
     sales_motion = df.iloc[1,8]
 
     return sales_motion
@@ -59,6 +58,55 @@ def pl_mgmt_read(df):
     growth_results_df = financial_retrieval(growth_costs,growth_revenues,growth_margins,growth_percentages)
 
     return day1_results_df, growth_results_df
+
+def rebate_data_processing(rebate_df):
+    # Data Transformation
+    processed_revenue = [revenue * 1000 for revenue in rebate_df["Revenue"]]
+    processed_percentage = [percentage * 100 for percentage in rebate_df["Percentage"]]
+
+  
+    data = {
+        "Category": ["Total Product", "Total Services", "Pan HPE"],
+        "Revenue": processed_revenue, 
+        "Percentage": processed_percentage
+    }
+
+    # Return final rebate df
+    return pd.DataFrame(data)
+
+def rebate_read(df):
+    day1_rebate = pd.DataFrame({
+    "Category": ["Product", "Services", "Pan HPE"],
+    "Revenue": [
+        df.iloc[48, 6],
+        df.iloc[48, 17],
+        df.iloc[48, 18]
+    ],
+    "Percentage": [
+        df.iloc[49, 6],
+        df.iloc[49, 17],
+        df.iloc[49, 18]
+    ]
+    })
+
+    growth_rebate = pd.DataFrame({
+    "Category": ["Product", "Services", "Pan HPE"],
+    "Revenue": [
+        df.iloc[31, 6],   
+        df.iloc[31, 17],  
+        df.iloc[31, 18]   
+    ],
+    "Percentage": [
+        df.iloc[21, 6],   
+        df.iloc[32, 17],  
+        df.iloc[32, 18]   
+    ]
+    })
+
+    day1_rebate = rebate_data_processing(day1_rebate)
+    growth_rebate = rebate_data_processing(growth_rebate)
+
+    return day1_rebate,growth_rebate
 
 def dynamic_options_selector(results_df):
     # Check if product 
@@ -103,7 +151,10 @@ def load_data(uploaded_file):
     day1_df,growth_df  = pl_mgmt_read(df)
     sales_motion = model_header_read(df)
 
-    return day1_df,growth_df,sales_motion 
+    if sales_motion == "Indirect":
+        day1_rebate, growth_rebate = rebate_read(df)
+
+    return day1_df,growth_df,sales_motion,day1_rebate,growth_rebate 
 
 def view_option_select(view_option,results_df):
     # Filter logic for the graphs

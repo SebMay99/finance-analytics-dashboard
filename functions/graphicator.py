@@ -25,13 +25,13 @@ def get_color_map(df):
     g_idx, y_idx, p_idx = 0, 0, 0
 
     for cat in df['Category'].unique():
-        if cat in config.product_cats:
+        if cat in config.product_cats_colors:
             color_map[cat] = greens[g_idx % len(greens)]
             g_idx += 1
-        elif cat in config.service_cats:
+        elif cat in config.service_cats_colors:
             color_map[cat] = blues[y_idx % len(blues)]
             y_idx += 1
-        elif cat in config.aps_cats: 
+        elif cat in config.aps_cats_colors: 
             color_map[cat] = purples[p_idx % len(purples)]
             p_idx += 1
         
@@ -78,7 +78,7 @@ def bar_graph_generation(filtered_plot_df,colors,margins,graph_type,
         },
         "Margin": {
             "total": total_margin,
-            "title": f"{scenario} Pan HPE FLGM Pre-rebate by{segment}Segment",
+            "title": f"{scenario} Pan HPE FLGM pre-rebate by{segment}Segment",
             "hover": "%{label}: %{value:,.2f}<extra></extra>",
             "text": "$%{y:,.2f}",
             "yaxis_prefix": "$",
@@ -87,7 +87,7 @@ def bar_graph_generation(filtered_plot_df,colors,margins,graph_type,
         },
         "Revenue": {
             "total": total_revenue,
-            "title": f"{scenario} Revenue by{segment}Segment",
+            "title": f"{scenario} Revenue pre-rebate by{segment}Segment",
             "hover": "%{label}: %{value:,.2f}<extra></extra>",
             "text": "$%{y:,.2f}",
             "yaxis_prefix": "$",
@@ -96,7 +96,7 @@ def bar_graph_generation(filtered_plot_df,colors,margins,graph_type,
         },
         "Percentage": {
             "total": total_percentage,
-            "title": f"{scenario} Pan HPE FLGM% Pre-rebate by{segment}Segment",
+            "title": f"{scenario} Pan HPE FLGM% pre-rebate by{segment}Segment",
             "hover": "%{label}: %{value:,.2f}%<extra></extra>",
             "text": "%{y:.2f}%",
             "yaxis_prefix": "",
@@ -177,13 +177,13 @@ def pie_graph_generation(filtered_plot_df, colors, margins, graph_type,
             "total_label": lambda t: f"<b>Total: ${t:,.2f}</b>"
         },
         "Margin": {
-            "title": f"{scenario}{segment}Pan HPE FLGM Pre-rebate Distribution",
+            "title": f"{scenario}{segment}Pan HPE FLGM pre-rebate Distribution",
             "hover": "<b>%{label}</b><br>Margin: $%{value:,.2f}<br>% out of total: %{percent:.2%}<extra></extra>",
             "total": total_margin,
             "total_label": lambda t: f"<b>Total: ${t:,.2f}</b>"
         },
         "Revenue": {
-            "title": f"{scenario}{segment}Revenue Distribution",
+            "title": f"{scenario}{segment}Revenue pre-rebate Distribution",
             "hover": "<b>%{label}</b><br>Revenue: $%{value:,.2f}<br>% out of total: %{percent:.2%}<extra></extra>",
             "total": total_revenue,
             "total_label": lambda t: f"<b>Total: ${t:,.2f}</b>"
@@ -254,7 +254,193 @@ def table_generation(filtered_table_df):
     # Change HTML headers
     html_table = html_table.replace(">Cost<", ">Costs<") \
                         .replace(">Revenue<", ">Revenue<") \
-                        .replace(">Margin<", ">FLGM Pre-rebate<")\
-                        .replace(">Percentage<", ">FLGM% Pre-rebate<")\
+                        .replace(">Margin<", ">FLGM pre-rebate<")\
+                        .replace(">Percentage<", ">FLGM% pre-rebate<")\
                         
     return html_table
+
+def rebate_bar_graph_generation(df,colors,margins,graph_type,scenario,segment):
+    total_revenue, total_percentage = df.loc[df['Category'] == 'Pan HPE', ['Revenue','Percentage']].values[0] 
+
+    filtered_plot_df = df.drop(df[df['Category'] == 'Pan HPE'].index)
+
+    if segment.strip() == "Product":
+        filtered_plot_df = filtered_plot_df.drop(filtered_plot_df[filtered_plot_df['Category'] == 'Total Services'].index)
+        total_revenue, total_percentage = df.loc[df['Category'] == 'Total Product', ['Revenue','Percentage']].values[0] 
+    elif segment.strip() == "Service":
+        filtered_plot_df = filtered_plot_df.drop(filtered_plot_df[filtered_plot_df['Category'] == 'Total Product'].index)
+        total_revenue, total_percentage = df.loc[df['Category'] == 'Total Services', ['Revenue','Percentage']].values[0] 
+    elif segment == "A&PS Only":
+        return None
+
+    # Config by type of graph
+    config = {
+        "Revenue": {
+            "total": total_revenue,
+            "title": f"{scenario} Revenue post-rebate by{segment}Segment",
+            "hover": "%{label}: %{value:,.2f}<extra></extra>",
+            "text": "$%{y:,.2f}",
+            "yaxis_prefix": "$",
+            "yaxis_title": "Revenue (USD)",
+            "total_label": lambda t: f"<b>Total: ${t:,.2f}</b>"
+        },
+        "Percentage": {
+            "total": total_percentage,
+            "title": f"{scenario} Pan HPE FLGM% post-rebate by{segment}Segment",
+            "hover": "%{label}: %{value:,.2f}%<extra></extra>",
+            "text": "%{y:.2f}%",
+            "yaxis_prefix": "",
+            "yaxis_title": "Percentage (%)",
+            "total_label": lambda t: f"<b>Total: {t:.2f}%</b>"
+        }
+    }
+
+    # Get config from graph_type
+    cfg = config[graph_type]
+    total = cfg["total"]
+    graph_title = cfg["title"]
+    hover_template = cfg["hover"]
+    texttemplate = cfg["text"]
+    yaxis_prefix = cfg["yaxis_prefix"]
+    yaxis_title = cfg["yaxis_title"]
+    total_label = cfg["total_label"](total)
+
+    # Create graph
+    fig = px.bar(
+        filtered_plot_df,
+        x='Category',
+        y=graph_type,
+        title=graph_title,
+        text_auto='.3s',
+        color="Category",
+        color_discrete_map=colors
+    )
+
+    fig.update_traces(
+        texttemplate=texttemplate,
+        textposition='outside',
+        cliponaxis=False,
+        meta=dict(graph_type=graph_type),
+        hovertemplate=hover_template
+    )
+
+    # Add total to legend
+    fig.add_trace(go.Scatter(
+        x=[None],
+        y=[None],
+        mode='markers',
+        marker=dict(size=0),
+        showlegend=True,
+        name=total_label,
+        legendgroup='total',
+    ))
+
+    # Layout
+    fig.update_layout(
+        title={'y': 0.95, 'x': 0.5, 'xanchor': 'center', 'yanchor': 'top'},
+        margin=margins,
+        title_font=dict(size=20)
+    )
+
+    # Y axis
+    fig.update_yaxes(
+        tickprefix=yaxis_prefix,
+        title_text=yaxis_title
+    )
+
+    st.plotly_chart(fig, width='stretch')
+    return fig
+
+def rebate_pie_graph_generation(df, colors, margins, graph_type,scenario,segment):
+    total_revenue = df.loc[df['Category'] == 'Pan HPE', ['Revenue']].values[0].item()
+
+    filtered_plot_df = df.drop(df[df['Category'] == 'Pan HPE'].index)
+
+    if segment.strip() == "Product":
+        filtered_plot_df = filtered_plot_df.drop(filtered_plot_df[filtered_plot_df['Category'] == 'Total Services'].index)
+        total_revenue = df.loc[df['Category'] == 'Total Product', ['Revenue']].values[0].item()
+    elif segment.strip() == "Service":
+        filtered_plot_df = filtered_plot_df.drop(filtered_plot_df[filtered_plot_df['Category'] == 'Total Product'].index)
+        total_revenue = df.loc[df['Category'] == 'Total Services', ['Revenue']].values[0].item()
+    elif segment == "A&PS Only":
+        return None
+    # No pie graph for Percentage
+    if graph_type == 'Percentage':
+        return None
+
+    # Config by graph type
+    config = {
+        "Revenue": {
+            "title": f"{scenario}{segment}Revenue post-rebate Distribution",
+            "hover": "<b>%{label}</b><br>Revenue: $%{value:,.2f}<br>% out of total: %{percent:.2%}<extra></extra>",
+            "total": total_revenue,
+            "total_label": lambda t: f"<b>Total: ${t:,.2f}</b>"
+        }
+    }
+  
+
+    cfg = config[graph_type]
+    total_label = cfg["total_label"](cfg["total"])
+   
+
+    # Create graph
+    fig = px.pie(
+        filtered_plot_df,
+        values=graph_type,
+        names='Category',
+        hole=0.5,
+        title=cfg["title"],
+        color='Category',
+        color_discrete_map=colors
+    )
+
+    fig.update_traces(
+        textinfo='percent+label',
+        textposition='inside',
+        insidetextorientation='horizontal',
+        textfont=dict(weight="bold"),
+        hovertemplate=cfg["hover"]
+    )
+
+    # Add total at the end of the legend
+    fig.add_trace(go.Scatter(
+        x=[None], y=[None],
+        mode='markers',
+        marker=dict(size=0),
+        showlegend=True,
+        name=total_label,
+        legendgroup='total',
+    ))
+
+    fig.update_layout(
+        margin=margins,
+        uniformtext=dict(minsize=10, mode='hide'),
+        title={'y': 0.95, 'x': 0.5, 'xanchor': 'center'},
+        title_font=dict(size=20)
+    )
+
+    fig.update_xaxes(visible=False)
+    fig.update_yaxes(visible=False)
+
+    st.plotly_chart(fig, width='stretch')
+
+    return fig
+
+def rebate_graph_type_selector(filtered_plot_df,chart_type,graph_type,scenario,segment):
+    # Graph colors
+    colors = get_color_map(filtered_plot_df)
+    # Graph margins
+    margins = dict(l=100, r=30, t=80, b=80)
+
+    # Normalize for graph title
+    if segment == "All":
+        segment = " "
+    elif segment == "Products Only":
+        segment = " Product "
+    elif segment == "Services Only":
+        segment = " Service "
+
+    if chart_type == "Bar Charts":
+        rebate_bar_graph_generation(filtered_plot_df,colors,margins,graph_type,scenario,segment)
+    elif chart_type == "Donut Charts":
+        rebate_pie_graph_generation(filtered_plot_df,colors,margins,graph_type,scenario,segment)
