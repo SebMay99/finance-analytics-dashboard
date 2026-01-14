@@ -28,9 +28,9 @@ For testing and debugging run to try the app in a local browser:
 `streamlit run app.py`
 
 # Compile Python code into a distributable .exe
-To compile the code into an .exe run:
+To compile the code into an .exe run build.bat:
 
-`streamlit-desktop-app build app.py --name HPE_Financial_App_v0.3 --icon .\assets\HPE_icon.png --pyinstaller-options --add-data "functions\processing.py;functions" --add-data "assets\HPE_icon.webp;assets" --add-data "style.css;." --add-data ".streamlit/config.toml;.streamlit" --add-data "functions\processing.py;functions" --add-data "public/config.py;public" --add-data "functions\graphicator.py;functions"  --onedir --noconsole --noconfirm --clean`
+`.\build.bat`
 
 Each file and asset has to be specified, otherwise it won't be included in the compilation and the .exe won't work. 
 
