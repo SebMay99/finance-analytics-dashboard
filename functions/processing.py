@@ -97,7 +97,7 @@ def rebate_read(df):
         df.iloc[31, 18]   
     ],
     "Percentage": [
-        df.iloc[21, 6],   
+        df.iloc[32, 6],   
         df.iloc[32, 17],  
         df.iloc[32, 18]   
     ]

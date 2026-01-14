@@ -260,7 +260,7 @@ def table_generation(filtered_table_df):
     return html_table
 
 def rebate_bar_graph_generation(df,colors,margins,graph_type,scenario,segment):
-    total_revenue, total_percentage = df.loc[df['Category'] == 'Pan HPE', ['Revenue','Percentage']].values[0] 
+    total_revenue, total_percentage = df.loc[df['Category'] == 'Pan HPE', ['Revenue','Percentage']].values[0]
 
     filtered_plot_df = df.drop(df[df['Category'] == 'Pan HPE'].index)
 
