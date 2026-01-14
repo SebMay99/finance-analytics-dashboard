@@ -1,7 +1,7 @@
 import streamlit as st 
 from PIL import Image
 from functions.processing import local_css,dynamic_options_selector, load_data, resource_path,view_option_select
-from functions.graphicator import graph_type_selector,table_generation
+from functions.graphicator import graph_type_selector,table_generation,rebate_graph_type_selector
 
 icon_path = resource_path("assets/HPE_icon.webp")
 
@@ -33,11 +33,11 @@ if uploaded_file:
     try:
         
         # Load Excel file to memory
-        day1_df,growth_df,sales_motion  = load_data(uploaded_file)
+        day1_df,growth_df,sales_motion,day1_rebate,growth_rebate = load_data(uploaded_file)
 
         st.markdown("#### Model Summary")
         st.info(f"Sales Motion: {sales_motion}")
-
+        
         # Visualization
         st.write("### 2. Financial Analysis Breakdown")
 
@@ -45,9 +45,12 @@ if uploaded_file:
         scenario_option = st.selectbox("Select Sceneario", ["Day 1","Growth"])
         if scenario_option == "Day 1":
             results_df = day1_df
+            rebate_df = day1_rebate
+            
         elif scenario_option == "Growth":
             results_df = growth_df
-
+            rebate_df = growth_rebate
+          
         # Select Segments view
         available_options = dynamic_options_selector(results_df)
 
@@ -82,8 +85,25 @@ if uploaded_file:
                 graph_type_selector(filtered_plot_df,chart_type,'Margin',total_cost, total_revenue,total_margin,total_percentage,scenario_option,view_option)
         
             with row2_col2:
-                graph_type_selector(filtered_plot_df,chart_type,'Percentage',total_cost, total_revenue,total_margin,total_percentage,scenario_option,view_option)
-                    
+                if sales_motion == "Indirect" and chart_type == "Donut Charts":
+                    rebate_graph_type_selector(rebate_df,chart_type,'Revenue',scenario_option,view_option)
+                else:
+                    graph_type_selector(filtered_plot_df,chart_type,'Percentage',total_cost, total_revenue,total_margin,total_percentage,scenario_option,view_option)
+        
+        # Add a new 1x2 row if Indirect sales motion
+        if sales_motion == "Indirect":
+            # Row 3
+            row3_col1, row3_col2 = st.columns(2)
+
+            with row3_col1:
+                if chart_type == "Bar Charts":
+                    rebate_graph_type_selector(rebate_df,chart_type,'Revenue',scenario_option,view_option)
+            
+            with row3_col2:
+                if chart_type == "Bar Charts":
+                    rebate_graph_type_selector(rebate_df,chart_type,'Percentage',scenario_option,view_option)
+                
+
         # Summary Table
         st.write("### Data Summary")
 
