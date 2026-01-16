@@ -3,6 +3,13 @@ import plotly.graph_objects as go
 import streamlit as st 
 from public import config
 
+# Remove only download button, keep other tools
+PLOTLY_CONFIG = {
+    'displayModeBar': True,
+    'modeBarButtonsToRemove': ['toImage', 'downloadImage'],
+    'displaylogo': False
+}
+
 def set_row_style(row):
     cat = str(row.Category).upper().strip()
     if cat in [ "TOTAL PRODUCT", "TOTAL SERVICES", "TOTAL A&PS"]:
@@ -39,6 +46,7 @@ def get_color_map(df):
 
 def graph_type_selector(filtered_plot_df,chart_type,graph_type,total_cost, 
                         total_revenue,total_margin,total_percentage,scenario,segment):
+
     # Graph colors
     colors = get_color_map(filtered_plot_df)
 
@@ -56,15 +64,22 @@ def graph_type_selector(filtered_plot_df,chart_type,graph_type,total_cost,
         segment = " A&PS "
 
     if chart_type == "Bar Charts":
-        bar_graph_generation(filtered_plot_df,colors,margins,graph_type,
+        fig =bar_graph_generation(filtered_plot_df,colors,margins,graph_type,
                              total_cost, total_revenue,total_margin,total_percentage,scenario,segment)
     elif chart_type == "Donut Charts":
-        pie_graph_generation(filtered_plot_df,colors,margins,graph_type,
+        fig = pie_graph_generation(filtered_plot_df,colors,margins,graph_type,
                              total_cost, total_revenue,total_margin,scenario,segment)
+        
+    # Return figure and filename
+    filename = f"{scenario}_{graph_type}_by{segment.strip()}_Segment.png"
+    return fig, filename
 
 def bar_graph_generation(filtered_plot_df,colors,margins,graph_type,
                          total_cost, total_revenue,total_margin,total_percentage,scenario,segment):
     
+    # Generar chart_key automáticamente
+    chart_key = f"{scenario}_{graph_type}_{segment}_{graph_type}".replace(" ", "_")
+
     # Config by type of graph
     config = {
         "Cost": {
@@ -158,11 +173,18 @@ def bar_graph_generation(filtered_plot_df,colors,margins,graph_type,
         title_text=yaxis_title
     )
 
-    st.plotly_chart(fig, width='stretch')
+    # Save fig in session_state
+    st.session_state[f'fig_{chart_key}'] = fig
+
+    st.plotly_chart(fig, width='stretch', config= PLOTLY_CONFIG, key=f"plot_{chart_key}")
+
     return fig
 
 def pie_graph_generation(filtered_plot_df, colors, margins, graph_type,
                          total_cost, total_revenue, total_margin,scenario,segment):
+
+    # Generar chart_key automáticamente
+    chart_key = f"{scenario}_{graph_type}_{segment}_{graph_type}".replace(" ", "_")
 
     # No pie graph for Percentage
     if graph_type == 'Percentage':
@@ -233,7 +255,10 @@ def pie_graph_generation(filtered_plot_df, colors, margins, graph_type,
     fig.update_xaxes(visible=False)
     fig.update_yaxes(visible=False)
 
-    st.plotly_chart(fig, width='stretch')
+    # Save fig in session_state
+    st.session_state[f'fig_{chart_key}'] = fig
+
+    st.plotly_chart(fig, width='stretch', config=PLOTLY_CONFIG, key=f"plot_{chart_key}")
 
     return fig
 
@@ -260,6 +285,9 @@ def table_generation(filtered_table_df):
     return html_table
 
 def rebate_bar_graph_generation(df,colors,margins,graph_type,scenario,segment):
+    # Generar chart_key automáticamente
+    chart_key = f"{scenario}_{graph_type}_{segment}_{graph_type}_{margins}".replace(" ", "_")
+
     total_revenue, total_percentage = df.loc[df['Category'] == 'Pan HPE', ['Revenue','Percentage']].values[0]
 
     filtered_plot_df = df.drop(df[df['Category'] == 'Pan HPE'].index)
@@ -348,10 +376,17 @@ def rebate_bar_graph_generation(df,colors,margins,graph_type,scenario,segment):
         title_text=yaxis_title
     )
 
-    st.plotly_chart(fig, width='stretch')
+    # Save fig in session_state
+    st.session_state[f'fig_{chart_key}'] = fig
+
+    st.plotly_chart(fig, width='stretch', config=PLOTLY_CONFIG, key=f"plot_{chart_key}")
+
     return fig
 
 def rebate_pie_graph_generation(df, colors, margins, graph_type,scenario,segment):
+    # Generar chart_key automáticamente
+    chart_key = f"{scenario}_{graph_type}_{segment}_{graph_type}_{margins}".replace(" ", "_")
+
     total_revenue = df.loc[df['Category'] == 'Pan HPE', ['Revenue']].values[0].item()
 
     filtered_plot_df = df.drop(df[df['Category'] == 'Pan HPE'].index)
@@ -422,11 +457,15 @@ def rebate_pie_graph_generation(df, colors, margins, graph_type,scenario,segment
     fig.update_xaxes(visible=False)
     fig.update_yaxes(visible=False)
 
-    st.plotly_chart(fig, width='stretch')
+    # Save fig in session_state
+    st.session_state[f'fig_{chart_key}'] = fig
 
+    st.plotly_chart(fig, width='stretch', config=PLOTLY_CONFIG, key=f"plot_{chart_key}")
+    
     return fig
 
 def rebate_graph_type_selector(filtered_plot_df,chart_type,graph_type,scenario,segment):
+
     # Graph colors
     colors = get_color_map(filtered_plot_df)
     # Graph margins
@@ -441,6 +480,11 @@ def rebate_graph_type_selector(filtered_plot_df,chart_type,graph_type,scenario,s
         segment = " Service "
 
     if chart_type == "Bar Charts":
-        rebate_bar_graph_generation(filtered_plot_df,colors,margins,graph_type,scenario,segment)
+        fig = rebate_bar_graph_generation(filtered_plot_df,colors,margins,graph_type,scenario,segment)
     elif chart_type == "Donut Charts":
-        rebate_pie_graph_generation(filtered_plot_df,colors,margins,graph_type,scenario,segment)
+        fig= rebate_pie_graph_generation(filtered_plot_df,colors,margins,graph_type,scenario,segment)
+    else:
+        fig = None
+    
+    return fig  # Add this line to return the figure
+

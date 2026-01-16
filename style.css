@@ -75,3 +75,41 @@
     display: none !important;
 }
 }
+
+/* Download section buttons - Individual downloads (Green) */
+section[data-testid="stVerticalBlock"] button[data-testid*="baseButton-secondary"] {
+    background-color: #01A982 !important;
+    color: white !important;
+    border: none !important;
+    font-weight: bold !important;
+}
+
+section[data-testid="stVerticalBlock"] button[data-testid*="baseButton-secondary"]:hover {
+    background-color: #009F73 !important;
+}
+
+/* Override for all download buttons */
+button[kind="secondary"] {
+    background-color: #01A982 !important;
+    color: white !important;
+}
+
+button[kind="secondary"]:hover {
+    background-color: #009F73 !important;
+}
+
+button[kind="primary"] {
+    background-color: #0070F8 !important;
+    color: white !important;
+}
+
+button[kind="primary"]:hover {
+    background-color: #0094FF !important;
+}
+
+/* Disabled buttons */
+button:disabled {
+    background-color: #cccccc !important;
+    color: #666666 !important;
+    cursor: not-allowed !important;
+}
