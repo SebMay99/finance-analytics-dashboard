@@ -22,11 +22,19 @@ try:
     KALEIDO_AVAILABLE = True
 except Exception as e:
     print(f"KALEIDO FAILED: {e}")
-    import traceback
-    traceback.print_exc()
     KALEIDO_AVAILABLE = False
 
 print(f"=== End Diagnostic ===")
+
+
+def generate_image_bytes(fig):
+    """Generate PNG bytes from figure - cached in session state"""
+    try:
+        img_bytes = pio.to_image(fig, format='png', width=1400, height=800, scale=2)
+        return img_bytes
+    except Exception as e:
+        print(f"Error generating image: {str(e)}")
+        return None
 
 
 def save_file_with_dialog(data, default_filename):
@@ -57,9 +65,51 @@ def save_file_with_dialog(data, default_filename):
         return False, str(e)
 
 
-def save_zip_with_dialog(data):
-    """Opens native save dialog for ZIP file"""
+def save_individual_chart(key, chart_data):
+    """Render individual download button below a chart"""
+    if not KALEIDO_AVAILABLE:
+        return
+    
+    label = key.replace('_', ' ').title()
+    
+    if st.button(f"Save {label}", key=f"save_{key}", use_container_width=True, type="secondary"):
+        # Generate image on demand (only when button clicked)
+        img_bytes = generate_image_bytes(chart_data['fig'])
+        
+        if img_bytes:
+            success, result = save_file_with_dialog(img_bytes, chart_data['filename'])
+            if success:
+                st.toast(f"Saved to: {os.path.basename(result)}", icon="✅")
+                print(f"Saved {chart_data['filename']} to {result}")
+            elif result:
+                st.toast(f"Error: {result}", icon="❌")
+            else:
+                st.toast("Save cancelled", icon="ℹ️")
+        else:
+            st.toast("Failed to generate image", icon="❌")
+
+
+def save_all_charts_zip(figures_dict):
+    """Save all charts as ZIP with dialog"""
+    if not KALEIDO_AVAILABLE or not figures_dict:
+        st.toast("No charts available", icon="⚠️")
+        return
+    
     try:
+        with st.spinner("Creating ZIP..."):
+            zip_buffer = BytesIO()
+            
+            with ZipFile(zip_buffer, 'w') as zf:
+                for key, data in figures_dict.items():
+                    img_bytes = generate_image_bytes(data['fig'])
+                    if img_bytes:
+                        zf.writestr(data['filename'], img_bytes)
+                        print(f"Added {data['filename']} to ZIP")
+            
+            zip_data = zip_buffer.getvalue()
+            print(f"ZIP created: {len(zip_data)} bytes with {len(figures_dict)} files")
+        
+        # Save with dialog
         root = Tk()
         root.withdraw()
         root.wm_attributes('-topmost', 1)
@@ -67,10 +117,7 @@ def save_zip_with_dialog(data):
         filepath = filedialog.asksaveasfilename(
             defaultextension=".zip",
             initialfile="financial_charts.zip",
-            filetypes=[
-                ("ZIP Archive", "*.zip"),
-                ("All Files", "*.*")
-            ],
+            filetypes=[("ZIP Archive", "*.zip"), ("All Files", "*.*")],
             title="Save all charts as..."
         )
         
@@ -78,116 +125,22 @@ def save_zip_with_dialog(data):
         
         if filepath:
             with open(filepath, 'wb') as f:
-                f.write(data)
-            return True, filepath
-        return False, None
+                f.write(zip_data)
+            st.toast(f"ZIP saved: {os.path.basename(filepath)}", icon="✅")
+            print(f"Saved ZIP to {filepath}")
+        else:
+            st.toast("Save cancelled", icon="ℹ️")
+            
     except Exception as e:
-        return False, str(e)
+        st.toast(f"Error creating ZIP", icon="❌")
+        print(f"ZIP error: {str(e)}")
 
 
-def render_download_section(figures_dict):
-    """
-    Renders download section for saved figures
-    """
-    if not figures_dict:
-        st.info("No charts available for download")
-        return
+def render_export_buttons():
+    """Render PPT and PDF export buttons at the bottom"""
+    col1, col2 = st.columns(2)
     
-    # Show kaleido status
-    if not KALEIDO_AVAILABLE:
-        st.error("Image export unavailable - Kaleido not working")
-        return
-    
-    # st.success("Image export ready")
-    
-    # Show preparing message while generating download buttons
-    with st.spinner("Preparing downloads..."):
-        # Pre-generate all images
-        prepared_downloads = {}
-        success_count = 0
-        
-        for key, data in figures_dict.items():
-            try:
-                img_bytes = pio.to_image(
-                    data['fig'], 
-                    format='png', 
-                    width=1400, 
-                    height=800, 
-                    scale=2
-                )
-                prepared_downloads[key] = {
-                    'img_bytes': img_bytes,
-                    'filename': data['filename']
-                }
-                success_count += 1
-                print(f"Successfully prepared {key}: {len(img_bytes)} bytes")
-            except Exception as e:
-                print(f"Error preparing {key}: {str(e)}")
-        
-       # st.success(f"Prepared {success_count} charts for download")
-    
-    # Create two main columns
-    left_col, right_col = st.columns([1, 1])
-    
-    # LEFT COLUMN - Individual downloads
-    with left_col:
-        st.write("#### Individual Chart Downloads")
-        
-        for key, download_data in prepared_downloads.items():
-            label = key.replace('_', ' ').title()
-            button_label = f"Save {label} Chart"
-            
-            if st.button(button_label, key=f"save_{key}", use_container_width=True, type="secondary"):
-                success, result = save_file_with_dialog(
-                    download_data['img_bytes'], 
-                    download_data['filename']
-                )
-                if success:
-                    # st.success(f"Saved to: {result}")
-                    print(f"Saved {download_data['filename']} to {result}")
-                elif result:
-                    st.error(f"Error: {result}")
-                else:
-                    st.info("Save cancelled")
-            
-            st.write("")
-    
-    # RIGHT COLUMN - Batch downloads
-    with right_col:
-        st.write("#### Batch and Exports")
-        
-        # ZIP download
-        if st.button("Save All Charts (ZIP)", key="save_zip", use_container_width=True, type="primary"):
-            try:
-                # Create ZIP
-                zip_buffer = BytesIO()
-                
-                with ZipFile(zip_buffer, 'w') as zf:
-                    for key, download_data in prepared_downloads.items():
-                        zf.writestr(download_data['filename'], download_data['img_bytes'])
-                        print(f"Added {download_data['filename']} to ZIP")
-                
-                zip_data = zip_buffer.getvalue()
-                print(f"ZIP created: {len(zip_data)} bytes with {len(prepared_downloads)} files")
-                
-                # Save with dialog
-                success, result = save_zip_with_dialog(zip_data)
-                
-                if success:
-                    # st.success(f"ZIP saved to: {result}")
-                    print(f"Saved ZIP to {result}")
-                elif result:
-                    st.error(f"Error: {result}")
-                else:
-                    st.info("Save cancelled")
-                    
-            except Exception as e:
-                st.error(f"Error creating ZIP: {str(e)}")
-                print(f"ZIP error: {str(e)}")
-        
-        st.write("")
-        
-        # PowerPoint Export (disabled)
+    with col1:
         st.button(
             "Export to PowerPoint",
             disabled=True,
@@ -196,10 +149,8 @@ def render_download_section(figures_dict):
             help="Feature coming soon",
             type="primary"
         )
-        
-        st.write("")
-        
-        # PDF Export (disabled)
+    
+    with col2:
         st.button(
             "Export to PDF",
             disabled=True,

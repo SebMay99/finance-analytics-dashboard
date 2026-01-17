@@ -2,7 +2,7 @@ import streamlit as st
 from PIL import Image
 from functions.processing import local_css,dynamic_options_selector, load_data, resource_path,view_option_select
 from functions.graphicator import graph_type_selector,table_generation,rebate_graph_type_selector
-from functions.download import render_download_section
+from functions.download import save_individual_chart, save_all_charts_zip, render_export_buttons
 
 icon_path = resource_path("assets/HPE_icon.webp")
 
@@ -19,13 +19,6 @@ st.set_page_config(
 
 # Apply CSS styles
 local_css("style.css")
-
-# Sidebar
-# with st.sidebar:
-#    st.image(Image.open("assets/HPE-logo-2025.png"), width=120)
-#    st.title("Navigation")
-#    st.markdown("---")
-#    st.info("Log in to access advanced features")
     
 # Main interface
 st.title("HPE GreenLake Finance Analytics")
@@ -68,13 +61,22 @@ if uploaded_file:
         # Select Segments view
         available_options = dynamic_options_selector(results_df)
 
-        col_filter1, col_filter2 = st.columns(2)
+        col_filter1, col_filter2 = st.columns([4, 1])
 
         with col_filter1:
-            view_option = st.selectbox("Select View", available_options)
+            sub_col1, sub_col2 = st.columns(2)
+            with sub_col1:
+                view_option = st.selectbox("Select View", available_options)
+            with sub_col2:
+                chart_type = st.selectbox("Chart Style",["Bar Charts","Donut Charts"])
 
         with col_filter2:
-            chart_type = st.selectbox("Chart Style",["Bar Charts","Donut Charts"])
+            st.write("")  # Spacer
+            st.write("")  # Extra spacer to align
+            if st.button("Save All (ZIP)", key="save_all_zip", use_container_width=True, type="primary"):
+                save_all_charts_zip(st.session_state.figures)
+
+        st.markdown("---")
 
         # Filter logic for the graphs and table
         filtered_plot_df,filtered_table_df,total_cost, total_revenue,total_margin,total_percentage= view_option_select(view_option,results_df)
@@ -83,13 +85,12 @@ if uploaded_file:
         if (st.session_state.previous_scenario != scenario_option or 
             st.session_state.previous_view != view_option or 
             st.session_state.previous_chart_type != chart_type):
-            st.session_state.figures = {}  # Clear all saved figures
+            st.session_state.figures = {}
             st.session_state.previous_scenario = scenario_option
             st.session_state.previous_view = view_option
             st.session_state.previous_chart_type = chart_type
 
-        #Graphs
-        # Grid Layout 2x2
+        # Graphs Grid Layout 2x2
         if not filtered_table_df.empty:
 
             # Row 1
@@ -98,10 +99,14 @@ if uploaded_file:
             with row1_col1:
                 fig, filename = graph_type_selector(filtered_plot_df,chart_type,'Cost',total_cost, total_revenue,total_margin,total_percentage,scenario_option,view_option)
                 st.session_state.figures['cost'] = {'fig': fig, 'filename': filename}
+                # Button DENTRO de la columna
+                save_individual_chart('cost', st.session_state.figures['cost'])
             
             with row1_col2:
                 fig, filename = graph_type_selector(filtered_plot_df,chart_type,'Revenue',total_cost, total_revenue,total_margin,total_percentage,scenario_option,view_option)
                 st.session_state.figures['revenue'] = {'fig': fig, 'filename': filename}
+                # Button DENTRO de la columna
+                save_individual_chart('revenue', st.session_state.figures['revenue'])
 
             # Row 2
             row2_col1, row2_col2 = st.columns(2)
@@ -109,6 +114,8 @@ if uploaded_file:
             with row2_col1:
                 fig, filename = graph_type_selector(filtered_plot_df,chart_type,'Margin',total_cost, total_revenue,total_margin,total_percentage,scenario_option,view_option)
                 st.session_state.figures['margin_pre_rebate'] = {'fig': fig, 'filename': filename}
+                # Button DENTRO de la columna
+                save_individual_chart('margin_pre_rebate', st.session_state.figures['margin_pre_rebate'])
 
             with row2_col2:
                 if sales_motion == "Indirect" and chart_type == "Donut Charts":
@@ -116,41 +123,46 @@ if uploaded_file:
                     if fig:
                         filename = f"{scenario_option}_Revenue_post_rebate_by{view_option.replace(' ', '_')}_Segment.png"
                         st.session_state.figures['revenue_post_rebate'] = {'fig': fig, 'filename': filename}
+                        # Button DENTRO de la columna
+                        save_individual_chart('revenue_post_rebate', st.session_state.figures['revenue_post_rebate'])
                     
                 else:
                     fig, filename = graph_type_selector(filtered_plot_df,chart_type,'Percentage',total_cost, total_revenue,total_margin,total_percentage,scenario_option,view_option)
                     st.session_state.figures['percentage'] = {'fig': fig, 'filename': filename}
+                    # Button DENTRO de la columna
+                    save_individual_chart('percentage', st.session_state.figures['percentage'])
 
-        # Add a new 1x2 row if Indirect sales motion
-        if sales_motion == "Indirect":
-            # Row 3
-            row3_col1, row3_col2 = st.columns(2)
+            # Row 3 if Indirect
+            if sales_motion == "Indirect":
+                row3_col1, row3_col2 = st.columns(2)
 
-            with row3_col1:
-                if chart_type == "Bar Charts":
-                    fig = rebate_graph_type_selector(rebate_df,chart_type,'Revenue',scenario_option,view_option)
-                    if fig:
-                        filename = f"{scenario_option}_Revenue_post_rebate_by{view_option.replace(' ', '_')}_Segment.png"
-                        st.session_state.figures['revenue_post_rebate'] = {'fig': fig, 'filename': filename}
-            
-            with row3_col2:
-                if chart_type == "Bar Charts":
-                    fig = rebate_graph_type_selector(rebate_df,chart_type,'Percentage',scenario_option,view_option)
-                    if fig:
-                        filename = f"{scenario_option}_Percentage_post_rebate_by{view_option.replace(' ', '_')}_Segment.png"
-                        st.session_state.figures['percentage_post_rebate'] = {'fig': fig, 'filename': filename}
+                with row3_col1:
+                    if chart_type == "Bar Charts":
+                        fig = rebate_graph_type_selector(rebate_df,chart_type,'Revenue',scenario_option,view_option)
+                        if fig:
+                            filename = f"{scenario_option}_Revenue_post_rebate_by{view_option.replace(' ', '_')}_Segment.png"
+                            st.session_state.figures['revenue_post_rebate'] = {'fig': fig, 'filename': filename}
+                            # Button DENTRO de la columna
+                            save_individual_chart('revenue_post_rebate', st.session_state.figures['revenue_post_rebate'])
                 
-
+                with row3_col2:
+                    if chart_type == "Bar Charts":
+                        fig = rebate_graph_type_selector(rebate_df,chart_type,'Percentage',scenario_option,view_option)
+                        if fig:
+                            filename = f"{scenario_option}_Percentage_post_rebate_by{view_option.replace(' ', '_')}_Segment.png"
+                            st.session_state.figures['percentage_post_rebate'] = {'fig': fig, 'filename': filename}
+                            # Button DENTRO de la columna
+                            save_individual_chart('percentage_post_rebate', st.session_state.figures['percentage_post_rebate'])
         # Summary Table
-        st.write("#### Data Summary Table")
+        st.write("### Data Summary")
 
         if not filtered_table_df.empty:
             html_table = table_generation(filtered_table_df)
         st.markdown(html_table, unsafe_allow_html=True)
 
-        st.write("### 3. Downloads")
-        # Download Section
-        render_download_section(st.session_state.figures)
+        # Export buttons at the bottom
+        st.write("### 3. Additional Exports")
+        render_export_buttons()
 
     except Exception as e:
         st.error(f"Error:{e}")
