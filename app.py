@@ -2,7 +2,7 @@ import streamlit as st
 from PIL import Image
 from functions.processing import local_css,dynamic_options_selector, load_data, resource_path,view_option_select
 from functions.graphicator import graph_type_selector,table_generation,rebate_graph_type_selector
-from functions.download import save_individual_chart, save_all_charts_zip, render_export_buttons
+from functions.download import save_individual_chart, save_all_charts_zip_button, render_export_buttons
 
 icon_path = resource_path("assets/HPE_icon.webp")
 
@@ -73,8 +73,8 @@ if uploaded_file:
         with col_filter2:
             st.write("")  # Spacer
             st.write("")  # Extra spacer to align
-            if st.button("Save All (ZIP)", key="save_all_zip", use_container_width=True, type="primary"):
-                save_all_charts_zip(st.session_state.figures)
+            # Create placeholder for ZIP button
+            zip_button_placeholder = st.empty()
 
         st.markdown("---")
 
@@ -99,13 +99,11 @@ if uploaded_file:
             with row1_col1:
                 fig, filename = graph_type_selector(filtered_plot_df,chart_type,'Cost',total_cost, total_revenue,total_margin,total_percentage,scenario_option,view_option)
                 st.session_state.figures['cost'] = {'fig': fig, 'filename': filename}
-                # Button DENTRO de la columna
                 save_individual_chart('cost', st.session_state.figures['cost'])
             
             with row1_col2:
                 fig, filename = graph_type_selector(filtered_plot_df,chart_type,'Revenue',total_cost, total_revenue,total_margin,total_percentage,scenario_option,view_option)
                 st.session_state.figures['revenue'] = {'fig': fig, 'filename': filename}
-                # Button DENTRO de la columna
                 save_individual_chart('revenue', st.session_state.figures['revenue'])
 
             # Row 2
@@ -114,7 +112,6 @@ if uploaded_file:
             with row2_col1:
                 fig, filename = graph_type_selector(filtered_plot_df,chart_type,'Margin',total_cost, total_revenue,total_margin,total_percentage,scenario_option,view_option)
                 st.session_state.figures['margin_pre_rebate'] = {'fig': fig, 'filename': filename}
-                # Button DENTRO de la columna
                 save_individual_chart('margin_pre_rebate', st.session_state.figures['margin_pre_rebate'])
 
             with row2_col2:
@@ -123,13 +120,11 @@ if uploaded_file:
                     if fig:
                         filename = f"{scenario_option}_Revenue_post_rebate_by{view_option.replace(' ', '_')}_Segment.png"
                         st.session_state.figures['revenue_post_rebate'] = {'fig': fig, 'filename': filename}
-                        # Button DENTRO de la columna
                         save_individual_chart('revenue_post_rebate', st.session_state.figures['revenue_post_rebate'])
                     
                 else:
                     fig, filename = graph_type_selector(filtered_plot_df,chart_type,'Percentage',total_cost, total_revenue,total_margin,total_percentage,scenario_option,view_option)
                     st.session_state.figures['percentage'] = {'fig': fig, 'filename': filename}
-                    # Button DENTRO de la columna
                     save_individual_chart('percentage', st.session_state.figures['percentage'])
 
             # Row 3 if Indirect
@@ -142,7 +137,6 @@ if uploaded_file:
                         if fig:
                             filename = f"{scenario_option}_Revenue_post_rebate_by{view_option.replace(' ', '_')}_Segment.png"
                             st.session_state.figures['revenue_post_rebate'] = {'fig': fig, 'filename': filename}
-                            # Button DENTRO de la columna
                             save_individual_chart('revenue_post_rebate', st.session_state.figures['revenue_post_rebate'])
                 
                 with row3_col2:
@@ -151,8 +145,12 @@ if uploaded_file:
                         if fig:
                             filename = f"{scenario_option}_Percentage_post_rebate_by{view_option.replace(' ', '_')}_Segment.png"
                             st.session_state.figures['percentage_post_rebate'] = {'fig': fig, 'filename': filename}
-                            # Button DENTRO de la columna
                             save_individual_chart('percentage_post_rebate', st.session_state.figures['percentage_post_rebate'])
+        
+        # NOW populate the ZIP button after figures are generated
+        with zip_button_placeholder.container():
+            save_all_charts_zip_button(st.session_state.figures)
+
         # Summary Table
         st.write("### Data Summary")
 

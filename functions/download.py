@@ -65,6 +65,23 @@ def save_file_with_dialog(data, default_filename):
         return False, str(e)
 
 
+def handle_save_chart(key, chart_data):
+    """Callback function to handle save without visible rerun"""
+    img_bytes = generate_image_bytes(chart_data['fig'])
+    
+    if img_bytes:
+        success, result = save_file_with_dialog(img_bytes, chart_data['filename'])
+        if success:
+            st.session_state[f'save_message_{key}'] = f"✅ Saved to: {os.path.basename(result)}"
+            print(f"Saved {chart_data['filename']} to {result}")
+        elif result:
+            st.session_state[f'save_message_{key}'] = f"❌ Error: {result}"
+        else:
+            st.session_state[f'save_message_{key}'] = "ℹ️ Save cancelled"
+    else:
+        st.session_state[f'save_message_{key}'] = "❌ Failed to generate image"
+
+
 def save_individual_chart(key, chart_data):
     """Render individual download button below a chart"""
     if not KALEIDO_AVAILABLE:
@@ -72,42 +89,48 @@ def save_individual_chart(key, chart_data):
     
     label = key.replace('_', ' ').title()
     
-    if st.button(f"Save {label}", key=f"save_{key}", use_container_width=True, type="secondary"):
-        # Generate image on demand (only when button clicked)
-        img_bytes = generate_image_bytes(chart_data['fig'])
+    # Show message if exists
+    if f'save_message_{key}' in st.session_state:
+        message = st.session_state[f'save_message_{key}']
         
-        if img_bytes:
-            success, result = save_file_with_dialog(img_bytes, chart_data['filename'])
-            if success:
-                st.toast(f"Saved to: {os.path.basename(result)}", icon="✅")
-                print(f"Saved {chart_data['filename']} to {result}")
-            elif result:
-                st.toast(f"Error: {result}", icon="❌")
-            else:
-                st.toast("Save cancelled", icon="ℹ️")
-        else:
-            st.toast("Failed to generate image", icon="❌")
+        if '✅' in message:
+            st.toast(message.replace('✅ ', ''), icon="✅")
+        elif '❌' in message:
+            st.toast(message.replace('❌ ', ''), icon="❌")
+        elif 'ℹ️' in message:
+            st.toast(message.replace('ℹ️ ', ''), icon="ℹ️")
+        
+        del st.session_state[f'save_message_{key}']
+    
+    st.button(
+        f"💾 Save {label} Chart", 
+        key=f"save_{key}", 
+        use_container_width=True, 
+        type="secondary",
+        on_click=handle_save_chart,
+        args=(key, chart_data)
+    )
 
 
-def save_all_charts_zip(figures_dict):
-    """Save all charts as ZIP with dialog"""
+def handle_save_all_zip(figures_dict):
+    """Callback function to handle ZIP save without visible rerun"""
     if not KALEIDO_AVAILABLE or not figures_dict:
-        st.toast("No charts available", icon="⚠️")
+        st.session_state['zip_message'] = "⚠️ No charts available"
         return
     
     try:
-        with st.spinner("Creating ZIP..."):
-            zip_buffer = BytesIO()
-            
-            with ZipFile(zip_buffer, 'w') as zf:
-                for key, data in figures_dict.items():
-                    img_bytes = generate_image_bytes(data['fig'])
-                    if img_bytes:
-                        zf.writestr(data['filename'], img_bytes)
-                        print(f"Added {data['filename']} to ZIP")
-            
-            zip_data = zip_buffer.getvalue()
-            print(f"ZIP created: {len(zip_data)} bytes with {len(figures_dict)} files")
+        # Create ZIP
+        zip_buffer = BytesIO()
+        
+        with ZipFile(zip_buffer, 'w') as zf:
+            for key, data in figures_dict.items():
+                img_bytes = generate_image_bytes(data['fig'])
+                if img_bytes:
+                    zf.writestr(data['filename'], img_bytes)
+                    print(f"Added {data['filename']} to ZIP")
+        
+        zip_data = zip_buffer.getvalue()
+        print(f"ZIP created: {len(zip_data)} bytes with {len(figures_dict)} files")
         
         # Save with dialog
         root = Tk()
@@ -126,14 +149,43 @@ def save_all_charts_zip(figures_dict):
         if filepath:
             with open(filepath, 'wb') as f:
                 f.write(zip_data)
-            st.toast(f"ZIP saved: {os.path.basename(filepath)}", icon="✅")
+            st.session_state['zip_message'] = f"✅ ZIP saved: {os.path.basename(filepath)}"
             print(f"Saved ZIP to {filepath}")
         else:
-            st.toast("Save cancelled", icon="ℹ️")
+            st.session_state['zip_message'] = "ℹ️ Save cancelled"
             
     except Exception as e:
-        st.toast(f"Error creating ZIP", icon="❌")
+        st.session_state['zip_message'] = "❌ Error creating ZIP"
         print(f"ZIP error: {str(e)}")
+
+
+def save_all_charts_zip_button(figures_dict):
+    """Render ZIP download button with callback"""
+    
+    # Show and clear message if exists (before button render)
+    if 'zip_message' in st.session_state:
+        message = st.session_state['zip_message']
+        
+        if '✅' in message:
+            st.toast(message.replace('✅ ', ''), icon="✅")
+        elif '❌' in message:
+            st.toast(message.replace('❌ ', ''), icon="❌")
+        elif 'ℹ️' in message:
+            st.toast(message.replace('ℹ️ ', ''), icon="ℹ️")
+        elif '⚠️' in message:
+            st.toast(message.replace('⚠️ ', ''), icon="⚠️")
+        
+        del st.session_state['zip_message']
+    
+    # Render button with unique key
+    st.button(
+        "Save All (ZIP)", 
+        key="save_all_zip_btn",
+        use_container_width=True, 
+        type="primary",
+        on_click=handle_save_all_zip,
+        args=(figures_dict,)
+    )
 
 
 def render_export_buttons():
