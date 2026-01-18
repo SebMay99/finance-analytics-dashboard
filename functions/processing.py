@@ -1,21 +1,22 @@
-import streamlit as st 
-import pandas as pd
-import sys
-import os
-from public import config
+import streamlit as st
 
 def resource_path(relative_path):
+    import os
+    import sys
+
     if hasattr(sys, '_MEIPASS'):
         return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.path.abspath("."), relative_path)
 
 # Load CSS
 def local_css(file_name):
+    import streamlit as st 
     with open(resource_path(file_name)) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 
 def financial_retrieval(costs,revenues,margins,percentages):
+    import pandas as pd
 
     # Data Transformation
     processed_costs = [cost * 1000 for cost in costs]
@@ -40,6 +41,7 @@ def model_header_read(df):
     sales_motion = df.iloc[1,8]
 
     return sales_motion
+
 def pl_mgmt_read(df):
 
     # Cell Mapping for Day 1 financial information
@@ -60,6 +62,8 @@ def pl_mgmt_read(df):
     return day1_results_df, growth_results_df
 
 def rebate_data_processing(rebate_df):
+    import pandas as pd
+
     # Data Transformation
     processed_revenue = [revenue * 1000 for revenue in rebate_df["Revenue"]]
     processed_percentage = [percentage * 100 for percentage in rebate_df["Percentage"]]
@@ -75,6 +79,8 @@ def rebate_data_processing(rebate_df):
     return pd.DataFrame(data)
 
 def rebate_read(df):
+    import pandas as pd
+
     day1_rebate = pd.DataFrame({
     "Category": ["Product", "Services", "Pan HPE"],
     "Revenue": [
@@ -109,6 +115,8 @@ def rebate_read(df):
     return day1_rebate,growth_rebate
 
 def dynamic_options_selector(results_df):
+    
+
     # Check if product 
     prod_total_row = results_df[results_df['Category'] == 'Total Product']
     total_prod_cost = prod_total_row['Cost'].values[0] if not prod_total_row.empty else 0
@@ -134,9 +142,10 @@ def dynamic_options_selector(results_df):
         available_options.append("A&PS Only")
 
     return available_options
-
+ 
 @st.cache_data # Cache the Excel file
 def load_data(uploaded_file):
+    import pandas as pd
     # Load the All Reports as a DF and Check if it's a custom file
     try:
         sheet_name = "PL_MGMT Edit"
@@ -159,6 +168,8 @@ def load_data(uploaded_file):
     return day1_df,growth_df,sales_motion,day1_rebate,growth_rebate 
 
 def view_option_select(view_option,results_df):
+    from public import config
+    
     # Filter logic for the graphs
     if view_option == "Products Only":
         plot_df = results_df[results_df['Category'].isin(config.product_cats)]
