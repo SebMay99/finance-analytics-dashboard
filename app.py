@@ -1,8 +1,7 @@
 import streamlit as st 
 from PIL import Image
-from functions.processing import local_css,dynamic_options_selector, load_data, resource_path,view_option_select
-from functions.graphicator import graph_type_selector,table_generation,rebate_graph_type_selector
-from functions.download import save_individual_chart, save_all_charts_zip_button, render_export_buttons
+from functions.processing import resource_path, local_css
+
 
 icon_path = resource_path("assets/HPE_icon.webp")
 
@@ -28,6 +27,12 @@ st.markdown("### 1. Data Ingestion")
 uploaded_file = st.file_uploader("Upload your All Reports Excel file", type=["xlsx"])
 
 if uploaded_file:
+    # NOW load heavy imports only when needed
+    with st.spinner("Loading modules..."):
+        from functions.processing import  dynamic_options_selector, load_data, view_option_select
+        from functions.graphicator import graph_type_selector, table_generation, rebate_graph_type_selector
+        from functions.download import save_individual_chart, save_all_charts_zip_button, render_export_buttons
+    
     try:
         
         # Load Excel file to memory
