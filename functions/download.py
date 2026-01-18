@@ -1,27 +1,14 @@
 import plotly.io as pio
 import plotly.graph_objects as go
-import sys
 
-
-# Diagnostic logging
-print(f"=== Kaleido Diagnostic ===")
-print(f"Python: {sys.executable}")
-
+# Check if kaleido is available
 try:
-    import kaleido
-    print("Kaleido module imported")
-    print(f"Kaleido file: {kaleido.__file__}")
     
     test_fig = go.Figure(data=[go.Bar(x=[1], y=[1])])
     test_img = pio.to_image(test_fig, format='png')
-    print(f"SUCCESS: Kaleido working - generated {len(test_img)} bytes")
     KALEIDO_AVAILABLE = True
 except Exception as e:
-    print(f"KALEIDO FAILED: {e}")
     KALEIDO_AVAILABLE = False
-
-print(f"=== End Diagnostic ===")
-
 
 def generate_image_bytes(fig):
     """Generate PNG bytes from figure - cached in session state"""

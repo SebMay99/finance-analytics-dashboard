@@ -1,7 +1,6 @@
 import streamlit as st 
 from PIL import Image
-from functions.processing import resource_path, local_css
-
+from functions.processing import resource_path, local_css,footer_message
 
 icon_path = resource_path("assets/HPE_icon.webp")
 
@@ -11,7 +10,7 @@ if 'figures' not in st.session_state:
 
 # Page configuration 
 st.set_page_config(
-    page_title="HPE GreenLake Finance Analytics v0.3",
+    page_title="HPE GreenLake Finance Analytics v1.0",
     page_icon = Image.open(icon_path),
     layout="wide"
 )
@@ -20,7 +19,7 @@ st.set_page_config(
 local_css("style.css")
     
 # Main interface
-st.title("HPE GreenLake Finance Analytics")
+st.title("HPE GreenLake Finance Analytics v1.0")
 
 # File upload section
 st.markdown("### 1. Data Ingestion")
@@ -167,8 +166,12 @@ if uploaded_file:
         st.write("### 3. Additional Exports")
         render_export_buttons()
 
+        footer_message()
+
     except Exception as e:
         st.error(f"Error:{e}")
 
 else:
     st.warning("Awaiting file upload...")
+
+    footer_message()

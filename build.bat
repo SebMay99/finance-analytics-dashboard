@@ -7,9 +7,9 @@ if exist dist move dist dist_old_%TIMESTAMP% >nul 2>&1
 if exist build move build build_old_%TIMESTAMP% >nul 2>&1
 if exist *.spec del /q *.spec >nul 2>&1
 
-echo Building application...
+echo Building optimized executable...
 streamlit-desktop-app build app.py ^
- --name HPE_Financial_App_v0.6-beta.1701^
+ --name HPE_Financial_App_v1.0 ^
  --icon .\assets\HPE_icon.png ^
  --pyinstaller-options ^
  --add-data "functions;functions" ^
@@ -24,6 +24,10 @@ streamlit-desktop-app build app.py ^
  --hidden-import tkinter.filedialog ^
  --collect-all kaleido ^
  --copy-metadata kaleido ^
+ --exclude-module pytest ^
+ --exclude-module IPython ^
+ --exclude-module matplotlib ^
+ --exclude-module scipy ^
  --onedir --noconsole --noconfirm --clean
 
 echo Build complete!

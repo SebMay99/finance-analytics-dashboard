@@ -223,3 +223,22 @@ def view_option_select(view_option,results_df):
 
     return filtered_plot_df,filtered_table_df,total_cost, total_revenue,total_margin,total_percentage
 
+def footer_message():
+    st.markdown("---")
+    st.markdown(
+        """
+        <div style='text-align: center; color: #808495; font-size: 12px; padding: 15px;'>
+            <p style='margin: 5px 0;'>
+                <strong>HPE GreenLake Finance Analytics</strong> v1.0.1801
+            </p>
+            <p style='margin: 5px 0;'>
+                Built using Streamlit & Plotly | 
+                <a href='mailto:sebastian.mayorga@hpe.com' style='color: #01a982; text-decoration: none;'>Contact Support</a>
+            </p>
+            <p style='margin: 5px 0; font-size: 10px;'>
+                © 2026 GreenLake Presales Team | For internal use only
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
