@@ -1,8 +1,6 @@
 import streamlit as st 
 from PIL import Image
-from functions.processing import local_css,dynamic_options_selector, load_data, resource_path,view_option_select
-from functions.graphicator import graph_type_selector,table_generation,rebate_graph_type_selector
-from functions.download import save_individual_chart, save_all_charts_zip_button, render_export_buttons
+from functions.processing import resource_path, local_css,footer_message
 
 icon_path = resource_path("assets/HPE_icon.webp")
 
@@ -12,7 +10,7 @@ if 'figures' not in st.session_state:
 
 # Page configuration 
 st.set_page_config(
-    page_title="HPE GreenLake Finance Analytics v0.3",
+    page_title="HPE GreenLake Finance Analytics v1.0",
     page_icon = Image.open(icon_path),
     layout="wide"
 )
@@ -21,13 +19,19 @@ st.set_page_config(
 local_css("style.css")
     
 # Main interface
-st.title("HPE GreenLake Finance Analytics")
+st.title("HPE GreenLake Finance Analytics v1.0")
 
 # File upload section
 st.markdown("### 1. Data Ingestion")
 uploaded_file = st.file_uploader("Upload your All Reports Excel file", type=["xlsx"])
 
 if uploaded_file:
+    # NOW load heavy imports only when needed
+    with st.spinner("Loading modules..."):
+        from functions.processing import  dynamic_options_selector, load_data, view_option_select
+        from functions.graphicator import graph_type_selector, table_generation, rebate_graph_type_selector
+        from functions.download import save_individual_chart, save_all_charts_zip_button, render_export_buttons
+    
     try:
         
         # Load Excel file to memory
@@ -162,8 +166,12 @@ if uploaded_file:
         st.write("### 3. Additional Exports")
         render_export_buttons()
 
+        footer_message()
+
     except Exception as e:
         st.error(f"Error:{e}")
 
 else:
     st.warning("Awaiting file upload...")
+
+    footer_message()

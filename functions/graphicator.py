@@ -1,8 +1,3 @@
-import plotly.express as px
-import plotly.graph_objects as go
-import streamlit as st 
-from public import config
-
 # Remove only download button, keep other tools
 PLOTLY_CONFIG = {
     'displayModeBar': True,
@@ -21,6 +16,7 @@ def set_row_style(row):
     return [''] * len(row)
 
 def get_color_map(df):
+    from public import config
     
     color_map = {}
     # Color scales
@@ -77,6 +73,10 @@ def graph_type_selector(filtered_plot_df,chart_type,graph_type,total_cost,
 def bar_graph_generation(filtered_plot_df,colors,margins,graph_type,
                          total_cost, total_revenue,total_margin,total_percentage,scenario,segment):
     
+    import plotly.express as px
+    import plotly.graph_objects as go
+    import streamlit as st 
+
     # Generar chart_key automáticamente
     chart_key = f"{scenario}_{graph_type}_{segment}_{graph_type}".replace(" ", "_")
 
@@ -183,6 +183,10 @@ def bar_graph_generation(filtered_plot_df,colors,margins,graph_type,
 def pie_graph_generation(filtered_plot_df, colors, margins, graph_type,
                          total_cost, total_revenue, total_margin,scenario,segment):
 
+    import plotly.express as px
+    import plotly.graph_objects as go
+    import streamlit as st
+
     # Generar chart_key automáticamente
     chart_key = f"{scenario}_{graph_type}_{segment}_{graph_type}".replace(" ", "_")
 
@@ -285,6 +289,10 @@ def table_generation(filtered_table_df):
     return html_table
 
 def rebate_bar_graph_generation(df,colors,margins,graph_type,scenario,segment):
+    import plotly.express as px
+    import plotly.graph_objects as go
+    import streamlit as st
+
     # Generar chart_key automáticamente
     chart_key = f"{scenario}_{graph_type}_{segment}_{graph_type}_{margins}".replace(" ", "_")
 
@@ -384,6 +392,10 @@ def rebate_bar_graph_generation(df,colors,margins,graph_type,scenario,segment):
     return fig
 
 def rebate_pie_graph_generation(df, colors, margins, graph_type,scenario,segment):
+    import plotly.express as px
+    import plotly.graph_objects as go
+    import streamlit as st
+
     # Generar chart_key automáticamente
     chart_key = f"{scenario}_{graph_type}_{segment}_{graph_type}_{margins}".replace(" ", "_")
 

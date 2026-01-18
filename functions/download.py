@@ -1,31 +1,14 @@
-import streamlit as st 
 import plotly.io as pio
 import plotly.graph_objects as go
-from io import BytesIO
-from zipfile import ZipFile
-from tkinter import Tk, filedialog
-import sys
-import os
 
-# Diagnostic logging
-print(f"=== Kaleido Diagnostic ===")
-print(f"Python: {sys.executable}")
-
+# Check if kaleido is available
 try:
-    import kaleido
-    print("Kaleido module imported")
-    print(f"Kaleido file: {kaleido.__file__}")
     
     test_fig = go.Figure(data=[go.Bar(x=[1], y=[1])])
     test_img = pio.to_image(test_fig, format='png')
-    print(f"SUCCESS: Kaleido working - generated {len(test_img)} bytes")
     KALEIDO_AVAILABLE = True
 except Exception as e:
-    print(f"KALEIDO FAILED: {e}")
     KALEIDO_AVAILABLE = False
-
-print(f"=== End Diagnostic ===")
-
 
 def generate_image_bytes(fig):
     """Generate PNG bytes from figure - cached in session state"""
@@ -38,6 +21,9 @@ def generate_image_bytes(fig):
 
 
 def save_file_with_dialog(data, default_filename):
+    import os
+    from tkinter import Tk, filedialog
+
     """Opens native save dialog and saves file"""
     try:
         root = Tk()
@@ -66,6 +52,9 @@ def save_file_with_dialog(data, default_filename):
 
 
 def handle_save_chart(key, chart_data):
+    import os
+    import streamlit as st 
+
     """Callback function to handle save without visible rerun"""
     img_bytes = generate_image_bytes(chart_data['fig'])
     
@@ -83,6 +72,8 @@ def handle_save_chart(key, chart_data):
 
 
 def save_individual_chart(key, chart_data):
+    import streamlit as st 
+
     """Render individual download button below a chart"""
     if not KALEIDO_AVAILABLE:
         return
@@ -113,6 +104,12 @@ def save_individual_chart(key, chart_data):
 
 
 def handle_save_all_zip(figures_dict):
+    from zipfile import ZipFile
+    from tkinter import Tk, filedialog
+    from io import BytesIO
+    import streamlit as st 
+    import os
+
     """Callback function to handle ZIP save without visible rerun"""
     if not KALEIDO_AVAILABLE or not figures_dict:
         st.session_state['zip_message'] = "⚠️ No charts available"
@@ -160,6 +157,8 @@ def handle_save_all_zip(figures_dict):
 
 
 def save_all_charts_zip_button(figures_dict):
+    import streamlit as st 
+
     """Render ZIP download button with callback"""
     
     # Show and clear message if exists (before button render)
@@ -189,6 +188,8 @@ def save_all_charts_zip_button(figures_dict):
 
 
 def render_export_buttons():
+    import streamlit as st 
+
     """Render PPT and PDF export buttons at the bottom"""
     col1, col2 = st.columns(2)
     
