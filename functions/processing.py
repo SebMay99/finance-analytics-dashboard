@@ -143,7 +143,6 @@ def dynamic_options_selector(results_df):
 
     return available_options
  
-@st.cache_data # Cache the Excel file
 def load_data(uploaded_file):
     import pandas as pd
     # Load the All Reports as a DF and Check if it's a custom file
@@ -229,7 +228,7 @@ def footer_message():
         """
         <div style='text-align: center; color: #808495; font-size: 12px; padding: 15px;'>
             <p style='margin: 5px 0;'>
-                <strong>HPE GreenLake Finance Analytics</strong> v1.0.1801
+                <strong>HPE GreenLake Finance Analytics</strong> v1.1.0227
             </p>
             <p style='margin: 5px 0;'>
                 Built using Streamlit & Plotly | 
@@ -242,3 +241,52 @@ def footer_message():
         """,
         unsafe_allow_html=True
     )
+
+def consolidate_models(dfs: list):
+    """
+    Consolidate a list of DataFrames (same structure as financial_retrieval output)
+    by summing Cost, Revenue and Margin, then recalculating Percentage (FLGM%)
+    as Margin / Revenue * 100.
+
+    Works with both the main results df (Category / Cost / Revenue / Margin / Percentage)
+    and the rebate df (Category / Revenue / Percentage).
+    """
+    import pandas as pd
+
+    # Filter out empty / non-DataFrame entries
+    valid_dfs = [df for df in dfs if isinstance(df, pd.DataFrame) and not df.empty]
+
+    if not valid_dfs:
+        return pd.DataFrame()
+    if len(valid_dfs) == 1:
+        return valid_dfs[0].copy()
+
+    ref_df = valid_dfs[0].copy()
+
+    # Sum columns: Cost, Revenue, Margin (all numeric except Percentage)
+    sum_cols = [c for c in ref_df.select_dtypes(include="number").columns if c != "Percentage"]
+
+    for col in sum_cols:
+        ref_df[col] = sum(
+            df.set_index("Category")[col].reindex(ref_df["Category"]).fillna(0).values
+            for df in valid_dfs
+        )
+
+    # Recalculate Percentage = Margin / Revenue * 100
+    if "Margin" in ref_df.columns and "Percentage" in ref_df.columns:
+        ref_df["Percentage"] = ref_df.apply(
+            lambda row: (row["Margin"] / row["Revenue"] * 100) if row["Revenue"] != 0 else 0.0,
+            axis=1,
+        )
+    elif "Percentage" in ref_df.columns and "Revenue" in ref_df.columns:
+        # Rebate df: weighted average of post-rebate % using Revenue as weight
+        weighted_pct = sum(
+            df.set_index("Category")["Percentage"].reindex(ref_df["Category"]).fillna(0).values *
+            df.set_index("Category")["Revenue"].reindex(ref_df["Category"]).fillna(0).values
+            for df in valid_dfs
+        )
+        total_rev = ref_df["Revenue"].replace(0, float("nan"))
+        ref_df["Percentage"] = weighted_pct / total_rev.values
+        ref_df["Percentage"] = ref_df["Percentage"].fillna(0)
+
+    return ref_df
