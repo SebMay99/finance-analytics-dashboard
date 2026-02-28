@@ -9,7 +9,7 @@ if exist *.spec del /q *.spec >nul 2>&1
 
 echo Building optimized executable...
 streamlit-desktop-app build app.py ^
- --name HPE_Financial_App_v1.0 ^
+ --name HPE_Financial_App_v1.1 ^
  --icon .\assets\HPE_icon.png ^
  --pyinstaller-options ^
  --add-data "functions;functions" ^
