@@ -228,7 +228,7 @@ def footer_message():
         """
         <div style='text-align: center; color: #808495; font-size: 12px; padding: 15px;'>
             <p style='margin: 5px 0;'>
-                <strong>GreenLake  Pulse — Finance Analytics Dashboard</strong> v1.1.0301
+                <strong>GreenLake Pulse - Finance Analytics Dashboard</strong> v1.1.0301
             </p>
             <p style='margin: 5px 0;'>
                 Built using Streamlit & Plotly | 

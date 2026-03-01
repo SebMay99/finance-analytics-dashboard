@@ -29,7 +29,7 @@ st.set_page_config(
 
 local_css("style.css")
 
-st.title("GreenLake  Pulse — Finance Analytics Dashboard")
+st.title("GreenLake Pulse - Finance Analytics Dashboard")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 1 - Data Ingestion
