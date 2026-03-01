@@ -22,14 +22,14 @@ if 'previous_model_selection' not in st.session_state:
 
 # Page config
 st.set_page_config(
-    page_title="HPE GreenLake Finance Analytics v1.1",
+    page_title="GreenLake Pulse",
     page_icon=Image.open(icon_path),
     layout="wide"
 )
 
 local_css("style.css")
 
-st.title("HPE GreenLake Finance Analytics v1.1")
+st.title("GreenLake  Pulse — Finance Analytics Dashboard")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 1 - Data Ingestion

@@ -1,4 +1,4 @@
-# HPE GreenLake Finance Analytics
+# GreenLake  Pulse — Finance Analytics Dashboard
 
 A Streamlit-based financial analytics tool that transforms dense Excel financial models into interactive visual dashboards, enabling faster identification of cost optimization opportunities across GreenLake business segments.
 
