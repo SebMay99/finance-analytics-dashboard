@@ -9,7 +9,7 @@ if exist *.spec del /q *.spec >nul 2>&1
 
 echo Building optimized executable...
 streamlit-desktop-app build app.py ^
- --name GreenLake Pulse ^
+ --name GreenLake_Pulse ^
  --icon .\assets\HPE_icon.png ^
  --pyinstaller-options ^
  --add-data "functions;functions" ^
