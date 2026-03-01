@@ -29,12 +29,13 @@ st.set_page_config(
 
 local_css("style.css")
 
-st.title("GreenLake Pulse - Finance Analytics Dashboard")
+st.title("GreenLake Pulse")
+st.subheader("Finance Analytics Dashboard")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 1 - Data Ingestion
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown("### 1. Data Ingestion")
+st.markdown("#### 1. Data Ingestion")
 
 uploaded_file = st.file_uploader(
     "Upload an Excel model file (you can load multiple models one by one)",
@@ -70,7 +71,7 @@ if uploaded_file:
 
 # Loaded Models Cards
 if st.session_state.models:
-    st.markdown("#### Loaded Models")
+    st.markdown("##### Loaded Models")
 
     n_models = len(st.session_state.models)
     card_cols = st.columns(min(n_models, 5))
@@ -114,7 +115,7 @@ if st.session_state.models:
     from functions.graphicator import graph_type_selector, table_generation, rebate_graph_type_selector
     from functions.download import save_individual_chart, save_all_charts_zip_button, render_export_buttons
 
-    st.write("### 2. Financial Analysis Breakdown")
+    st.write("#### 2. Financial Analysis Breakdown")
 
     model_options = list(st.session_state.models.keys())
 
@@ -185,7 +186,7 @@ if st.session_state.models:
 
     st.markdown("---")
 
-    st.markdown(f"#### {model_label}")
+    st.markdown(f"##### {model_label}")
     # st.info(f"Sales Motion: {sales_motion}")
 
     # Clear chart cache when any filter changes
@@ -285,13 +286,13 @@ if st.session_state.models:
         save_all_charts_zip_button(st.session_state.figures)
 
     # Summary Table
-    st.write("### Data Summary")
+    st.write("#### Data Summary")
     if not filtered_table_df.empty:
         html_table = table_generation(filtered_table_df)
         st.markdown(html_table, unsafe_allow_html=True)
 
     # Additional Exports
-    st.write("### 3. Additional Exports")
+    st.write("#### 3. Additional Exports")
     render_export_buttons()
 
     footer_message()
