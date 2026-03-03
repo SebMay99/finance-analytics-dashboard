@@ -37,38 +37,43 @@ st.subheader("Finance Analytics Dashboard")
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("#### 1. Data Ingestion")
 
-uploaded_file = st.file_uploader(
-    "Upload an Excel model file (you can load multiple models one by one)",
+uploaded_files = st.file_uploader(
+    "Upload one or more Excel model files",
     type=["xlsx"],
+    accept_multiple_files=True,
     key=f"uploader_{st.session_state.uploader_key}"
 )
 
-if uploaded_file:
+if uploaded_files:
     with st.spinner("Loading modules..."):
         from functions.processing import dynamic_options_selector, load_data, view_option_select, consolidate_models
         from functions.graphicator import graph_type_selector, table_generation, rebate_graph_type_selector
         from functions.download import save_individual_chart, save_all_charts_zip_button, render_export_buttons
 
-    model_name = uploaded_file.name.replace(".xlsx", "")
+    new_models_loaded = 0
+    for uploaded_file in uploaded_files:
+        model_name = uploaded_file.name.replace(".xlsx", "")
+        if model_name not in st.session_state.models:
+            try:
+                day1_df, growth_df, sales_motion, day1_rebate, growth_rebate, currency, rate = load_data(uploaded_file)
+                st.session_state.models[model_name] = {
+                    "day1_df": day1_df,
+                    "growth_df": growth_df,
+                    "sales_motion": sales_motion,
+                    "day1_rebate": day1_rebate,
+                    "growth_rebate": growth_rebate,
+                    "currency": currency,
+                    "rate": rate,
+                }
+                new_models_loaded += 1
+            except Exception as e:
+                st.error(f"Error loading '{model_name}': {e}")
 
-    if model_name not in st.session_state.models:
-        try:
-            day1_df, growth_df, sales_motion, day1_rebate, growth_rebate, currency, rate = load_data(uploaded_file)
-            st.session_state.models[model_name] = {
-                "day1_df": day1_df,
-                "growth_df": growth_df,
-                "sales_motion": sales_motion,
-                "day1_rebate": day1_rebate,
-                "growth_rebate": growth_rebate,
-                "currency": currency,
-                "rate": rate,
-            }
-            st.session_state.figures = {}
-            st.session_state.previous_model_selection = None
-            st.session_state.uploader_key += 1
-            st.rerun()
-        except Exception as e:
-            st.error(f"Error loading '{model_name}': {e}")
+    if new_models_loaded > 0:
+        st.session_state.figures = {}
+        st.session_state.previous_model_selection = None
+        st.session_state.uploader_key += 1
+        st.rerun()
     else:
         pass
 
