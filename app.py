@@ -37,35 +37,43 @@ st.subheader("Finance Analytics Dashboard")
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("#### 1. Data Ingestion")
 
-uploaded_file = st.file_uploader(
-    "Upload an Excel model file (you can load multiple models one by one)",
+uploaded_files = st.file_uploader(
+    "Upload one or more Excel model files",
     type=["xlsx"],
+    accept_multiple_files=True,
     key=f"uploader_{st.session_state.uploader_key}"
 )
 
-if uploaded_file:
+if uploaded_files:
     with st.spinner("Loading modules..."):
         from functions.processing import dynamic_options_selector, load_data, view_option_select, consolidate_models
         from functions.graphicator import graph_type_selector, table_generation, rebate_graph_type_selector
         from functions.download import save_individual_chart, save_all_charts_zip_button, render_export_buttons
 
-    model_name = uploaded_file.name.replace(".xlsx", "")
+    new_models_loaded = 0
+    for uploaded_file in uploaded_files:
+        model_name = uploaded_file.name.replace(".xlsx", "")
+        if model_name not in st.session_state.models:
+            try:
+                day1_df, growth_df, sales_motion, day1_rebate, growth_rebate, currency, rate = load_data(uploaded_file)
+                st.session_state.models[model_name] = {
+                    "day1_df": day1_df,
+                    "growth_df": growth_df,
+                    "sales_motion": sales_motion,
+                    "day1_rebate": day1_rebate,
+                    "growth_rebate": growth_rebate,
+                    "currency": currency,
+                    "rate": rate,
+                }
+                new_models_loaded += 1
+            except Exception as e:
+                st.error(f"Error loading '{model_name}': {e}")
 
-    if model_name not in st.session_state.models:
-        try:
-            day1_df, growth_df, sales_motion, day1_rebate, growth_rebate = load_data(uploaded_file)
-            st.session_state.models[model_name] = {
-                "day1_df": day1_df,
-                "growth_df": growth_df,
-                "sales_motion": sales_motion,
-                "day1_rebate": day1_rebate,
-                "growth_rebate": growth_rebate,
-            }
-            st.session_state.figures = {}
-            st.session_state.previous_model_selection = None
-            st.toast(f"Model '{model_name}' loaded!")
-        except Exception as e:
-            st.error(f"Error loading '{model_name}': {e}")
+    if new_models_loaded > 0:
+        st.session_state.figures = {}
+        st.session_state.previous_model_selection = None
+        st.session_state.uploader_key += 1
+        st.rerun()
     else:
         pass
 
@@ -79,7 +87,15 @@ if st.session_state.models:
 
     for i, (mname, mdata) in enumerate(st.session_state.models.items()):
         with card_cols[i % 5]:
-            sm = mdata["sales_motion"]
+            sm       = mdata["sales_motion"]
+            currency = mdata["currency"]
+            rate     = mdata["rate"]
+
+            if currency == "USD":
+                currency_line = "<small style='color:#555;'>Currency: <b>USD</b></small>"
+            else:
+                currency_line = f"<small style='color:#555;'>Currency: <b>{currency}</b> &nbsp;|&nbsp; Rate: <b>{rate:.4f}</b></small>"
+
             st.markdown(
                 f"""
                 <div style="
@@ -90,7 +106,8 @@ if st.session_state.models:
                     background: #f4fefb;
                 ">
                     <span style="color:#01A982; font-weight:bold;">{mname}</span><br>
-                    <small style="color:#555;">Sales Motion: <b>{sm}</b></small>
+                    <small style="color:#555;">Sales Motion: <b>{sm}</b></small><br>
+                    {currency_line}
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -187,7 +204,6 @@ if st.session_state.models:
     st.markdown("---")
 
     st.markdown(f"##### {model_label}")
-    # st.info(f"Sales Motion: {sales_motion}")
 
     # Clear chart cache when any filter changes
     current_state  = (scenario_option, view_option, chart_type, model_selection)
