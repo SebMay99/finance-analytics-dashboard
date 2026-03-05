@@ -3,11 +3,9 @@ import plotly.graph_objects as go
 
 # Check if kaleido is available
 try:
-    
-    test_fig = go.Figure(data=[go.Bar(x=[1], y=[1])])
-    test_img = pio.to_image(test_fig, format='png')
+    from kaleido.scopes.plotly import PlotlyScope
     KALEIDO_AVAILABLE = True
-except Exception as e:
+except Exception:
     KALEIDO_AVAILABLE = False
 
 def generate_image_bytes(fig):

@@ -130,6 +130,7 @@ def rebate_read(df):
 
     return day1_rebate, growth_rebate
 
+@st.cache_data(show_spinner=False)
 def dynamic_options_selector(results_df):
 
     prod_total_row = results_df[results_df['Category'] == 'Total Product']
@@ -154,17 +155,17 @@ def dynamic_options_selector(results_df):
 
     return available_options
 
-def load_data(uploaded_file):
+@st.cache_data(show_spinner=False)
+def _load_excel_data(file_bytes):
     import pandas as pd
+    from io import BytesIO
 
     try:
-        sheet_name = "PL_MGMT Edit"
-        df = pd.read_excel(uploaded_file, sheet_name=sheet_name, engine='openpyxl')
-        st.success("Custom File Loaded")
+        df = pd.read_excel(BytesIO(file_bytes), sheet_name="PL_MGMT Edit", engine='openpyxl')
+        sheet_used = "edit"
     except:
-        sheet_name = "PL_MGMT"
-        df = pd.read_excel(uploaded_file, sheet_name=sheet_name, engine='openpyxl')
-        st.success("File Loaded")
+        df = pd.read_excel(BytesIO(file_bytes), sheet_name="PL_MGMT", engine='openpyxl')
+        sheet_used = "standard"
 
     day1_df, growth_df = pl_mgmt_read(df)
     sales_motion = model_header_read(df)
@@ -172,12 +173,23 @@ def load_data(uploaded_file):
 
     day1_rebate = 0
     growth_rebate = 0
-
     if sales_motion == "Indirect":
         day1_rebate, growth_rebate = rebate_read(df)
 
+    return day1_df, growth_df, sales_motion, day1_rebate, growth_rebate, currency, rate, sheet_used
+
+def load_data(uploaded_file):
+    day1_df, growth_df, sales_motion, day1_rebate, growth_rebate, currency, rate, sheet_used = \
+        _load_excel_data(uploaded_file.getvalue())
+
+    if sheet_used == "edit":
+        st.success("Custom File Loaded")
+    else:
+        st.success("File Loaded")
+
     return day1_df, growth_df, sales_motion, day1_rebate, growth_rebate, currency, rate
 
+@st.cache_data(show_spinner=False)
 def view_option_select(view_option, results_df):
     from public import config
 
@@ -249,6 +261,7 @@ def footer_message():
         unsafe_allow_html=True
     )
 
+@st.cache_data(show_spinner=False)
 def consolidate_models(dfs: list):
     """
     Consolidate a list of DataFrames by summing Cost, Revenue and Margin,
