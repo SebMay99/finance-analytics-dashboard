@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 
 # Check if kaleido is available
 try:
-    from kaleido.scopes.plotly import PlotlyScope
+    import kaleido
     KALEIDO_AVAILABLE = True
 except Exception:
     KALEIDO_AVAILABLE = False
