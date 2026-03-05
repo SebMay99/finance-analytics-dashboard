@@ -60,7 +60,6 @@ def currency_read(df):
 def pl_mgmt_read(df):
 
     currency, rate, fx = currency_read(df)
-    print(f"DEBUG currency_raw={repr(df.iloc[54, 3])} rate_raw={repr(df.iloc[55, 3])} -> currency={currency} rate={rate} fx={fx}")
 
     # Cell Mapping for Day 1 financial information
     day1_costs =       [v * fx for v in df.iloc[44, 1:24].tolist()]
