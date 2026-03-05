@@ -48,7 +48,7 @@ if uploaded_files:
     with st.spinner("Loading modules..."):
         from functions.processing import dynamic_options_selector, load_data, view_option_select, consolidate_models
         from functions.graphicator import graph_type_selector, table_generation, rebate_graph_type_selector
-        from functions.download import save_individual_chart, save_all_charts_zip_button, render_export_buttons
+        from functions.download import save_individual_chart, save_all_charts_zip_button, render_export_buttons, render_table_export_buttons
 
     new_models_loaded = 0
     for uploaded_file in uploaded_files:
@@ -130,7 +130,7 @@ if st.session_state.models:
 
     from functions.processing import dynamic_options_selector, view_option_select, consolidate_models
     from functions.graphicator import graph_type_selector, table_generation, rebate_graph_type_selector
-    from functions.download import save_individual_chart, save_all_charts_zip_button, render_export_buttons
+    from functions.download import save_individual_chart, save_all_charts_zip_button, render_export_buttons, render_table_export_buttons
 
     st.write("#### 2. Financial Analysis Breakdown")
 
@@ -306,6 +306,7 @@ if st.session_state.models:
     if not filtered_table_df.empty:
         html_table = table_generation(filtered_table_df)
         st.markdown(html_table, unsafe_allow_html=True)
+        render_table_export_buttons(filtered_table_df)
 
     # Additional Exports
     st.write("#### 3. Additional Exports")
