@@ -40,7 +40,7 @@ def model_header_read(df):
 
 def currency_read(df):
     currency_raw = df.iloc[53, 3]
-    rate_raw = df.iloc[54, 3]
+    rate_raw = df.iloc[54, 3] if df.shape[0] > 54 else None
 
     try:
         float(currency_raw)
