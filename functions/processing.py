@@ -161,10 +161,10 @@ def _load_excel_data(file_bytes):
     from io import BytesIO
 
     try:
-        df = pd.read_excel(BytesIO(file_bytes), sheet_name="PL_MGMT Edit", engine='openpyxl')
+        df = pd.read_excel(BytesIO(file_bytes), sheet_name="PL_MGMT Edit", engine='openpyxl', header=None)
         sheet_used = "edit"
     except:
-        df = pd.read_excel(BytesIO(file_bytes), sheet_name="PL_MGMT", engine='openpyxl')
+        df = pd.read_excel(BytesIO(file_bytes), sheet_name="PL_MGMT", engine='openpyxl', header=None)
         sheet_used = "standard"
 
     day1_df, growth_df = pl_mgmt_read(df)

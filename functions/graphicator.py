@@ -45,8 +45,13 @@ def get_color_map(df):
 
 @st.cache_data(show_spinner=False)
 def table_generation(filtered_table_df):
+    display_df = filtered_table_df.copy()
+    for col in ["Cost", "Revenue", "Margin", "Percentage"]:
+        if col in display_df.columns:
+            display_df[col] = display_df[col].fillna(0)
+
     html_table = (
-        filtered_table_df.style
+        display_df.style
         .apply(set_row_style, axis=1)
         .format({
             "Cost": "${:,.2f}",
