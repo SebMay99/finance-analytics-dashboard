@@ -198,7 +198,7 @@ def handle_save_table_png(df):
 
     highlight = {'TOTAL PRODUCT', 'TOTAL SERVICES', 'TOTAL A&PS'}
     grand     = {'TOTAL PRODUCTS+SERVICES'}
-    pan       = {'PAN HPE'}
+    pan       = {'GRAND TOTAL'}
 
     fill_colors = []
     font_colors = []

@@ -25,7 +25,7 @@ def financial_retrieval(costs, revenues, margins, percentages):
     data = {
         "Category": ["HPC-AI","Compute","Storage","Software","3P/OEM","Total Product","Installation","Support",
                         "Complete Care","Managed Services","Colo","3PP Product","3PP Support","SaaS","SW Services",
-                        "Ezmeral","Total Services","Total Products+Services","A&PS","A&PS 3PP","A&PS Colo","Total A&PS","Pan HPE"],
+                        "Ezmeral","Total Services","Total Products+Services","A&PS","A&PS 3PP","A&PS Colo","Total A&PS","Grand Total"],
         "Cost": processed_costs,
         "Revenue": processed_revenue,
         "Margin": processed_margin,
@@ -85,7 +85,7 @@ def rebate_data_processing(rebate_df):
     processed_percentage = [percentage * 100 for percentage in rebate_df["Percentage"]]
 
     data = {
-        "Category": ["Total Product", "Total Services", "Pan HPE"],
+        "Category": ["Total Product", "Total Services", "Grand Total"],
         "Revenue": processed_revenue,
         "Percentage": processed_percentage
     }
@@ -98,7 +98,7 @@ def rebate_read(df):
     currency, rate, fx = currency_read(df)
 
     day1_rebate = pd.DataFrame({
-        "Category": ["Product", "Services", "Pan HPE"],
+        "Category": ["Product", "Services", "Grand Total"],
         "Revenue": [
             df.iloc[48, 6] * fx,
             df.iloc[48, 17] * fx,
@@ -112,7 +112,7 @@ def rebate_read(df):
     })
 
     growth_rebate = pd.DataFrame({
-        "Category": ["Product", "Services", "Pan HPE"],
+        "Category": ["Product", "Services", "Grand Total"],
         "Revenue": [
             df.iloc[31, 6] * fx,
             df.iloc[31, 17] * fx,
@@ -224,15 +224,15 @@ def view_option_select(view_option, results_df):
         plot_df = results_df[(results_df['Category'] != "Total Product") &
                                 (results_df['Category'] != "Total Services") &
                                 (results_df['Category'] != "Total A&PS") &
-                                (results_df['Category'] != "Pan HPE") &
+                                (results_df['Category'] != "Grand Total") &
                                 (results_df['Category'] != "Total Products+Services")]
 
         table_df = results_df
 
-        total_cost = table_df[table_df['Category'] == 'Pan HPE']['Cost'].values[0]
-        total_revenue = table_df[table_df['Category'] == 'Pan HPE']['Revenue'].values[0]
-        total_margin = table_df[table_df['Category'] == 'Pan HPE']['Margin'].values[0]
-        total_percentage = table_df[table_df['Category'] == 'Pan HPE']['Percentage'].values[0]
+        total_cost = table_df[table_df['Category'] == 'Grand Total']['Cost'].values[0]
+        total_revenue = table_df[table_df['Category'] == 'Grand Total']['Revenue'].values[0]
+        total_margin = table_df[table_df['Category'] == 'Grand Total']['Margin'].values[0]
+        total_percentage = table_df[table_df['Category'] == 'Grand Total']['Percentage'].values[0]
 
     filtered_plot_df = plot_df[(plot_df['Cost'] > 0) | (plot_df['Margin'] != 0)]
     filtered_table_df = table_df[(table_df['Cost'] > 0) | (table_df['Margin'] != 0)]
@@ -247,14 +247,14 @@ def footer_message():
         """
         <div style='text-align: center; color: #808495; font-size: 12px; padding: 15px;'>
             <p style='margin: 5px 0;'>
-                <strong>GreenLake Pulse - Finance Analytics Dashboard</strong> v1.3.0305
+                <strong>Finance Analytics Dashboard</strong> v1.4
             </p>
             <p style='margin: 5px 0;'>
                 Built using Streamlit & Plotly | 
-                <a href='mailto:sebastian.mayorga@hpe.com' style='color: #01a982; text-decoration: none;'>Contact Support</a>
+                <a href='https://github.com/SebMay99/finance-analytics-dashboard' style='color: #01a982; text-decoration: none;'>GitHub</a>
             </p>
             <p style='margin: 5px 0; font-size: 10px;'>
-                © 2026 GreenLake Presales Team | For internal use only
+                © 2026 Finance Analytics Dashboard | Open Source
             </p>
         </div>
         """,

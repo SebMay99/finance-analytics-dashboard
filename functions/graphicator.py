@@ -15,7 +15,7 @@ def set_row_style(row):
         return ['background-color: #04909d; color: white; font-weight: bold;'] * len(row)
     elif cat in ["TOTAL PRODUCTS+SERVICES"]:
         return ['background-color: #01a982; color: white; font-weight: bold;'] * len(row)
-    elif cat in ["PAN HPE"]:
+    elif cat in ["GRAND TOTAL"]:
         return ['background-color: #7764fc; color: white; font-weight: bold;'] * len(row)
     return [''] * len(row)
 
@@ -85,7 +85,7 @@ def _build_bar_figure(filtered_plot_df, colors, graph_type,
             "total_label": f"<b>Total: ${total_cost:,.2f}</b>",
         },
         "Margin": {
-            "title": f"{scenario} Pan HPE FLGM pre-rebate by{segment}Segment",
+            "title": f"{scenario} Total FLGM pre-rebate by{segment}Segment",
             "hover": "%{label}: %{value:,.2f}<extra></extra>",
             "text": "$%{y:,.2f}",
             "yaxis_prefix": "$",
@@ -101,7 +101,7 @@ def _build_bar_figure(filtered_plot_df, colors, graph_type,
             "total_label": f"<b>Total: ${total_revenue:,.2f}</b>",
         },
         "Percentage": {
-            "title": f"{scenario} Pan HPE FLGM% pre-rebate by{segment}Segment",
+            "title": f"{scenario} Total FLGM% pre-rebate by{segment}Segment",
             "hover": "%{label}: %{value:,.2f}%<extra></extra>",
             "text": "%{y:.2f}%",
             "yaxis_prefix": "",
@@ -172,7 +172,7 @@ def _build_pie_figure(filtered_plot_df, colors, graph_type,
             "total_label": f"<b>Total: ${total_cost:,.2f}</b>",
         },
         "Margin": {
-            "title": f"{scenario}{segment}Pan HPE FLGM pre-rebate Distribution",
+            "title": f"{scenario}{segment}Total FLGM pre-rebate Distribution",
             "hover": "<b>%{label}</b><br>Margin: $%{value:,.2f}<br>% out of total: %{percent:.2%}<extra></extra>",
             "total_label": f"<b>Total: ${total_margin:,.2f}</b>",
         },
@@ -268,8 +268,8 @@ def graph_type_selector(filtered_plot_df, chart_type, graph_type, total_cost,
 def _build_rebate_bar_figure(df, colors, graph_type, scenario, segment):
     margins = dict(l=100, r=30, t=80, b=80)
 
-    total_revenue, total_percentage = df.loc[df['Category'] == 'Pan HPE', ['Revenue', 'Percentage']].values[0]
-    filtered_plot_df = df.drop(df[df['Category'] == 'Pan HPE'].index)
+    total_revenue, total_percentage = df.loc[df['Category'] == 'Grand Total', ['Revenue', 'Percentage']].values[0]
+    filtered_plot_df = df.drop(df[df['Category'] == 'Grand Total'].index)
 
     if segment.strip() == "Product":
         filtered_plot_df = filtered_plot_df.drop(
@@ -292,7 +292,7 @@ def _build_rebate_bar_figure(df, colors, graph_type, scenario, segment):
             "total_label": f"<b>Total: ${total_revenue:,.2f}</b>",
         },
         "Percentage": {
-            "title": f"{scenario} Pan HPE FLGM% post-rebate by{segment}Segment",
+            "title": f"{scenario} Total FLGM% post-rebate by{segment}Segment",
             "hover": "%{label}: %{value:,.2f}%<extra></extra>",
             "text": "%{y:.2f}%",
             "yaxis_prefix": "",
@@ -352,8 +352,8 @@ def _build_rebate_pie_figure(df, colors, graph_type, scenario, segment):
     if graph_type == 'Percentage':
         return None
 
-    total_revenue = df.loc[df['Category'] == 'Pan HPE', ['Revenue']].values[0].item()
-    filtered_plot_df = df.drop(df[df['Category'] == 'Pan HPE'].index)
+    total_revenue = df.loc[df['Category'] == 'Grand Total', ['Revenue']].values[0].item()
+    filtered_plot_df = df.drop(df[df['Category'] == 'Grand Total'].index)
 
     if segment.strip() == "Product":
         filtered_plot_df = filtered_plot_df.drop(

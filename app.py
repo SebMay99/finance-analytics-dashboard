@@ -2,7 +2,7 @@ import streamlit as st
 from PIL import Image
 from functions.processing import resource_path, local_css, footer_message
 
-icon_path = resource_path("assets/HPE_icon.webp")
+icon_path = resource_path("assets/app_icon.webp")
 
 # Session state initialization
 if 'figures' not in st.session_state:
@@ -22,15 +22,14 @@ if 'previous_model_selection' not in st.session_state:
 
 # Page config
 st.set_page_config(
-    page_title="GreenLake Pulse",
+    page_title="Finance Analytics Dashboard",
     page_icon=Image.open(icon_path),
     layout="wide"
 )
 
 local_css("style.css")
 
-st.title("GreenLake Pulse")
-st.subheader("Finance Analytics Dashboard")
+st.title("Finance Analytics Dashboard")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 1 - Data Ingestion
