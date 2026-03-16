@@ -3,9 +3,6 @@
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.x-FF4B4B?logo=streamlit&logoColor=white)
 ![Plotly](https://img.shields.io/badge/Plotly-Interactive-3F4F75?logo=plotly&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-22c55e)
-![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Web-0ea5e9)
-![Status](https://img.shields.io/badge/Status-Active-22c55e)
 
 > A Streamlit-based financial analytics tool that transforms Excel P&L models into interactive visual dashboards — enabling fast cost/revenue/margin analysis across business segments.
 
