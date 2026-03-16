@@ -10,6 +10,11 @@
 > A Streamlit-based financial analytics tool that transforms Excel P&L models into interactive visual dashboards — enabling fast cost/revenue/margin analysis across business segments.
 
 ---
+## Try the app
+
+https://finance-analytics-dashboard-ay7jcacf7ak4tezvtpzgdg.streamlit.app/
+
+---
 
 ## Features
 
